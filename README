@@ -1,8 +1,17 @@
+27/04/2015 :
+	Hollyday time is now finished, it's time to work !
+	Today, tasks have been clearly separated, in order to developp each part in a functionnal way; Each teammate will have a unique part to implement.
+		Project is separated into 3 parts : 
+		*Home page (dedicated to user's information) : Kevin Vincent
+		*Task component (dedicated to a task information) : Arnaud Brun
+		*Infinite scroll of task, which have tobe the interface between the both previous part : Eric Perlinski
+	As these 3 parts will be completed, we will move on specific features.
+
+
+
 09/04/2015 :
 	After a very long discussion, we've determined a suitable name for our website : "Help your bro' !"
 	Help your bro will provide an interface 
 		in the left hand to publish offers as Transportation, Moving, Paint room and so on;
 		in the other hand, to register as a contributor for a given offer;
 	The project has been launched !
-
-
