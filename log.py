@@ -1,15 +1,35 @@
 import os
+import re
+import random
+import hashlib
+import hmac
+import logging
+import json
+from string import letters
+
 import webapp2
 import jinja2
-import re
+
+from google.appengine.ext import db
 
 template_dir= os.path.join(os.path.dirname(__file__),'templates');
 jinja_env=jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),autoescape=True);
 
 
+secret = 'Dunno'
+
+
 def render_str(template, **params):
     t = jinja_env.get_template(template)
     return t.render(params)
+
+def make_secure_val(val):
+    return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
+
+def check_secure_val(secure_val):
+    val = secure_val.split('|')[0]
+    if secure_val == make_secure_val(val):
+        return val
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
@@ -23,19 +43,18 @@ EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 def valid_email(email):
     return not email or EMAIL_RE.match(email)
 
-
 class BlogHandler(webapp2.RequestHandler):
 
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
     def render_str(self, template, **params):
-        return render_str(template, **params)
-
+        params['user'] = self.user
+        t = jinja_env.get_template(template)
+        return t.render(params)
 
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
-
 
     def set_secure_cookie(self, name, val):
         cookie_val = make_secure_val(val)
@@ -53,15 +72,142 @@ class BlogHandler(webapp2.RequestHandler):
     def logout(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
+    def initialize(self, *a, **kw):
+        webapp2.RequestHandler.initialize(self, *a, **kw)
+        uid = self.read_secure_cookie('user_id')
+        self.user = uid and User.by_id(int(uid))
 
+        if self.request.url.endswith('.json'):
+            self.format = 'json'
+        else:
+            self.format = 'htlm'
+
+
+#### TODO ##################################################################
+#### Modify this in order to get the correct user pattern you've defined####
+############################################################################
+
+
+class User(db.Model):
+    name = db.StringProperty(required = True)
+    pw_hash = db.StringProperty(required = True)
+    email = db.StringProperty()
+
+    @classmethod
+    def by_id(cls, uid):
+        return User.get_by_id(uid, parent = users_key())
+
+    @classmethod
+    def by_name(cls, name):
+        u = User.all().filter('name =', name).get()
+        return u
+
+    @classmethod
+    def register(cls, name, pw, email = None):
+        pw_hash = make_pw_hash(name, pw)
+        return User(parent = users_key(),
+                    name = name,
+                    pw_hash = pw_hash,
+                    email = email)
+
+    @classmethod
+    def login(cls, name, pw):
+        u = cls.by_name(name)
+        if u and valid_pw(name, pw, u.pw_hash):
+            return u
+
+def make_salt(length = 5):
+    return ''.join(random.choice(letters) for x in xrange(length))
+
+def make_pw_hash(name, pw, salt = None):
+    if not salt:
+        salt = make_salt()
+    h = hashlib.sha256(name + pw + salt).hexdigest()
+    return '%s,%s' % (salt, h)
+
+def valid_pw(name, password, h):
+    salt = h.split(',')[0]
+    return h == make_pw_hash(name, password, salt)
+
+def users_key(group = 'default'):
+    return db.Key.from_path('users', group)
+
+
+###### TODO ####################################################################
+###### Modify this in order to get the correct post pattern you've defined #####
+################################################################################
+
+class Post(db.Model):
+    subject = db.StringProperty(required = True)
+    content = db.TextProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
+    last_modified = db.DateTimeProperty(auto_now = True)
+
+    def render(self):
+        self._render_text = self.content.replace('\n', '<br>')
+        return render_str("post.html", p = self)
+
+    def as_dict(self):
+        time_fmt = '%c'
+        d = {'subject': self.subject,
+             'content': self.content,
+             'created': self.created.strftime(time_fmt),
+             'last_modified': self.last_modified.strftime(time_fmt)}
+        return d
+
+class PostPage(BlogHandler):
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        if not post:
+            self.error(404)
+            return
+        if self.format == 'html':
+            self.render("permalink.html", post = post)
+        else:
+            self.render_json(post.as_dict())
+
+class NewPost(BlogHandler):
+    def get(self):
+        if self.user:
+            self.render("newpost.html")
+        else:
+            self.redirect("/login")
+
+    def post(self):
+        if not self.user:
+            self.redirect('/signup')
+
+        subject = self.request.get('subject')
+        content = self.request.get('content')
+
+        if subject and content:
+            p = Post(parent = blog_key(), subject = subject, content = content)
+            p.put()
+            self.redirect('/%s' % str(p.key().id()))
+        else:
+            error = "subject and content, please!"
+            self.render("newpost.html", subject=subject, content=content, error=error)
 
 class Main(BlogHandler):
     def get(self):
-        self.render("home.html")
+        if self.user:
+            ##### Modify this in order to get the proper page #####
+            self.render("home.html")
+        else:
+            self.render("home.html")
+
+class BlogFront(BlogHandler):
+    def get(self):
+        posts = greetings = Post.all().order('-created')
+        if self.format == 'html':
+            self.render('front.html', posts = posts)
+        else:
+            return self.render_json([p.as_dict() for p in posts])
 
 
-
-class Signup(BlogHandler):
+class SignUp(BlogHandler):
     def get(self):
         self.render("signup-form.html")
 
@@ -93,8 +239,23 @@ class Signup(BlogHandler):
         if have_error:
             self.render('signup-form.html', **params)
         else:
-            """Ecrire dans la base de donnee"""
+            self.done()
+
+    def done(self, *a, **kw):
+        #make sure the user doesn't already exist
+        u = User.by_name(self.username)
+        if u:
+            msg = 'That user already exists.'
+            self.render('signup-form.html', error_username = msg)
+        else:
+            u = User.register(self.username, self.password, self.email)
+            u.put()
+
+            self.login(u)
             self.redirect('/newcomer')
+        
+
+
 
 
 class Login(BlogHandler):
@@ -104,16 +265,19 @@ class Login(BlogHandler):
     def post(self):
         username = self.request.get('username')
         password = self.request.get('password')
-        """
-         lire la base de donnee pour verifier que l'utilisateur existe 
-        """
+
+        u = User.login(username,password)
+        if u:
+            self.login(u)
+            self.redirect('/newcomer')
+        else: 
+            msg = 'Invalid login'
+            self.render('login-form.html',error = msg)
 
 
-class Newcomer(BlogHandler):
+class NewComer(BlogHandler):
     def get(self):
         self.render('newcomer.html')
-
-
 
 
 class Logout(BlogHandler):
@@ -124,7 +288,9 @@ class Logout(BlogHandler):
 
 application = webapp2.WSGIApplication([('/',Main),
                                        ('/login',Login),
+                                       ('/?(?:.json)?', BlogFront),
+                                       ('/([0-9]+)(?:.json)?', PostPage),
                                        ('/logout', Logout),
-                                       ('/signup',Signup),
-                                       ('/newcomer',Newcomer),],
+                                       ('/signup',SignUp),
+                                       ('/newcomer',NewComer),],
                                       debug=True)
