@@ -43,6 +43,10 @@ EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 def valid_email(email):
     return not email or EMAIL_RE.match(email)
 
+PHONE_RE = re.compile(".*?(\(?\d{3}\D{0,3}\d{3}\D{0,3}\d{4}).*?")
+def valid_phone(phone):
+    return phone and PHONE_RE.match(phone)
+
 class BlogHandler(webapp2.RequestHandler):
 
     def write(self, *a, **kw):
@@ -75,7 +79,7 @@ class BlogHandler(webapp2.RequestHandler):
     def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
-        self.user = uid and User.by_id(int(uid))
+        self.user = uid and Register.by_id(int(uid))
 
         if self.request.url.endswith('.json'):
             self.format = 'json'
@@ -88,32 +92,35 @@ class BlogHandler(webapp2.RequestHandler):
 ############################################################################
 
 
-class User(db.Model):
-    name = db.StringProperty(required = True)
-    pw_hash = db.StringProperty(required = True)
-    email = db.StringProperty()
-
+class Register(db.Model):
+    username = db.StringProperty(required = True)
+    password = db.StringProperty(required = True)
+    email = db.StringProperty(required = True)
+    phone = db.StringProperty(required = True)
+    address = db.StringProperty(required = True)
     @classmethod
     def by_id(cls, uid):
-        return User.get_by_id(uid, parent = users_key())
+        return Register.get_by_id(uid, parent = register_key())
 
     @classmethod
     def by_name(cls, name):
-        u = User.all().filter('name =', name).get()
+        u = Register.all().filter('username =', name).get()
         return u
 
     @classmethod
-    def register(cls, name, pw, email = None):
-        pw_hash = make_pw_hash(name, pw)
-        return User(parent = users_key(),
-                    name = name,
-                    pw_hash = pw_hash,
-                    email = email)
+    def register(cls, username, password, email,phone,address):
+        pw_hash = make_pw_hash(username, password)
+        return Register(parent = register_key(),
+                    username = username,
+                    password = pw_hash,
+                    email = email,
+                    phone=phone,
+                    address=address)
 
     @classmethod
     def login(cls, name, pw):
         u = cls.by_name(name)
-        if u and valid_pw(name, pw, u.pw_hash):
+        if u and valid_pw(name, pw, u.password):
             return u
 
 def make_salt(length = 5):
@@ -129,8 +136,8 @@ def valid_pw(name, password, h):
     salt = h.split(',')[0]
     return h == make_pw_hash(name, password, salt)
 
-def users_key(group = 'default'):
-    return db.Key.from_path('users', group)
+def register_key(name = 'default'):
+    return db.Key.from_path('register', name)
 
 
 ###### TODO ####################################################################
@@ -231,10 +238,9 @@ class NewPost(BlogHandler):
 class Main(BlogHandler):
     def get(self):
         if self.user:
-            ##### Modify this in order to get the proper page #####
-            self.render("home.html")
+            self.render('home.html', user = self.user)
         else:
-            self.render("home.html")
+            self.render('home.html')
 
 class BlogFront(BlogHandler):
     def get(self):
@@ -245,7 +251,7 @@ class BlogFront(BlogHandler):
             return self.render_json([p.as_dict() for p in posts])
 
 
-class SignUp(BlogHandler):
+class Signup(BlogHandler):
     def get(self):
         self.render("signup-form.html")
 
@@ -255,10 +261,15 @@ class SignUp(BlogHandler):
         self.password = self.request.get('password')
         self.verify = self.request.get('verify')
         self.email = self.request.get('email')
+        self.phone=self.request.get('phone')
+        self.address=self.request.get('address')
 
         params = dict(username = self.username,
-                      email = self.email)
+                      email = self.email,
+                      phone=self.phone,
+                      address=self.address)
 
+        #verifier dans la base que pseudo n'existe pas
         if not valid_username(self.username):
             params['error_username'] = "That's not a valid username."
             have_error = True
@@ -266,6 +277,7 @@ class SignUp(BlogHandler):
         if not valid_password(self.password):
             params['error_password'] = "That wasn't a valid password."
             have_error = True
+
         elif self.password != self.verify:
             params['error_verify'] = "Your passwords didn't match."
             have_error = True
@@ -274,26 +286,21 @@ class SignUp(BlogHandler):
             params['error_email'] = "That's not a valid email."
             have_error = True
 
+        if not valid_phone(self.phone):
+        	params['error_phone']="That's not a valid phone number"
+        	have_error = True
+
+        if self.address=="":
+        	params['error_address']="This field is empty"
+        	have_error=True
+
         if have_error:
             self.render('signup-form.html', **params)
         else:
             self.done()
 
     def done(self, *a, **kw):
-        #make sure the user doesn't already exist
-        u = User.by_name(self.username)
-        if u:
-            msg = 'That user already exists.'
-            self.render('signup-form.html', error_username = msg)
-        else:
-            u = User.register(self.username, self.password, self.email)
-            u.put()
-
-            self.login(u)
-            self.redirect('/newcomer')
-        
-
-
+        raise NotImplementedError
 
 
 class Login(BlogHandler):
@@ -304,25 +311,32 @@ class Login(BlogHandler):
         username = self.request.get('username')
         password = self.request.get('password')
 
-        u = User.login(username,password)
+        u = Register.login(username,password)
         if u:
             self.login(u)
-            self.redirect('/newcomer')
+            self.redirect('/')
         else: 
             msg = 'Invalid login'
             self.render('login-form.html',error = msg)
 
 
-class NewComer(BlogHandler):
-    def get(self):
-        self.render('newcomer.html')
-
-
 class Logout(BlogHandler):
     def get(self):
         self.logout()
-        self.redirect('/signup')
+        self.redirect('/')
 
+class SaveUser(Signup):
+    def done(self):
+        #make sure the user doesn't already exist
+        u = Register.by_name(self.username)
+        if u:
+            msg = 'That user already exists.'
+            self.render('signup-form.html', error_username = msg)
+        else:
+            u = Register.register(self.username, self.password,self.email,self.phone,self.address)
+            u.put()
+            self.login(u)
+            self.redirect('/')
 
 
 
@@ -334,7 +348,6 @@ application = webapp2.WSGIApplication([('/',Main),
                                        ('/?(?:.json)?', BlogFront),
                                        ('/([0-9]+)(?:.json)?', PostPage),
                                        ('/logout', Logout),
-                                       ('/signup',SignUp),
-                                       ('/newcomer',NewComer),
+                                       ('/signup',SaveUser),
                                        ('/newtask', NewTask)],
                                       debug=True)

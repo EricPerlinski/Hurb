@@ -21,7 +21,13 @@
 
         <div class="login-area">
             {% if user %}
-                {{user.name}} (<a class="login-link" href="/logout">logout</a>)
+                welcome to Hurb {{user.username}} </br>
+		Your profil :</br>
+		mail : {{user.email}}</br>
+		Phone: {{user.phone}}</br>
+		Address: {{user.address}}</br>
+		(<a class="login-link" href="/logout">logout</a>)
+		
             {% else %}
                 <a class="login-link" href="/login">login</a>
                 <a class="login-link" href="/signup">signup</a>
