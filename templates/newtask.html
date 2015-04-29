@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Put a newTask</title>
+    <style type="text/css">
+      .label {text-align: right}
+      .error {color: red}
+    </style>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <script>
+    $(function() {
+      $( "#datepicker" ).datepicker();
+    });
+    </script>
+
+  </head>
+
+  <body>
+    <h2>enter a New Task</h2>
+    <form method="post">
+      <table>
+        <tr>
+          <td class="label">
+            title
+          </td>
+          <td>
+            <input type="text" name="title" value="{{title}}">
+          </td>
+          <td class="error">
+            {{error_title}}
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label">
+            Description
+          </td>
+          <td>
+            <textarea name="description">{{description}}</textarea>
+          </td>
+          <td class="error">
+            {{error_description}}
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label">
+            Set a Date
+          </td>
+          <td>
+            <input type="text" id="datepicker" name="date" value="{{date}}">
+          </td>
+          <td class="error">
+            {{error_date}}
+          </td>
+        </tr>
+
+      </table>
+
+      <input type="submit" value="Validate !">
+    </form>
+
+
+    <p>{{valid_task}}</p>
+  </body>
+
+</html>

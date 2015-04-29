@@ -137,23 +137,61 @@ def users_key(group = 'default'):
 ###### Modify this in order to get the correct post pattern you've defined #####
 ################################################################################
 
-class Post(db.Model):
-    subject = db.StringProperty(required = True)
-    content = db.TextProperty(required = True)
-    created = db.DateTimeProperty(auto_now_add = True)
-    last_modified = db.DateTimeProperty(auto_now = True)
+class Task(db.Model):
+    title = db.StringProperty(required = True)
+    description = db.TextProperty(required = True)
+    date = db.DateTimeProperty(required = True)    
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
-        return render_str("post.html", p = self)
+        return render_str("task.html", t = self)
+
+    
 
     def as_dict(self):
         time_fmt = '%c'
-        d = {'subject': self.subject,
-             'content': self.content,
-             'created': self.created.strftime(time_fmt),
-             'last_modified': self.last_modified.strftime(time_fmt)}
+        d = {'title': self.title,
+             'description': self.description,
+             'date': self.date.strftime(time_fmt)
+            }
         return d
+
+class NewTask(BlogHandler):
+    def get(self):
+        self.render('newtask.html')
+
+    def post(self):
+        have_error = False
+        self.taskTitle = self.request.get('title')
+        self.taskDescription = self.request.get('description')
+        self.taskDate = self.request.get('date')
+
+        params = dict(title = self.taskTitle,
+                      description = self.taskDescription,
+                      date = self.taskDate)
+
+        if not self.taskTitle:
+            params['error_title'] = "Please enter a Title"
+            have_error = True
+
+        if not self.taskDescription:
+            params['error_description'] = "Please enter a description"
+            have_error = True            
+
+        #Check the date, cannot be a previous date
+        if not self.taskDate:
+            params['error_date'] = "Please, set up a date"
+            have_error = True
+
+        #Add the new task if it doesn't have any error
+        if not have_error:
+            task = Task(parent = task_key(), title = self.taskTitle, description = self.taskDescription, date = self.taskDate)
+            task.put()
+            params['valid_task'] = "Your task has been added to the taskBoard"
+
+        self.render('newtask.html', **params)
+        
+
 
 class PostPage(BlogHandler):
     def get(self, post_id):
@@ -286,11 +324,17 @@ class Logout(BlogHandler):
         self.redirect('/signup')
 
 
+
+
+
+
+
 application = webapp2.WSGIApplication([('/',Main),
                                        ('/login',Login),
                                        ('/?(?:.json)?', BlogFront),
                                        ('/([0-9]+)(?:.json)?', PostPage),
                                        ('/logout', Logout),
                                        ('/signup',SignUp),
-                                       ('/newcomer',NewComer),],
+                                       ('/newcomer',NewComer),
+                                       ('/newtask', NewTask)],
                                       debug=True)
