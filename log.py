@@ -197,7 +197,7 @@ class NewTask(BlogHandler):
 
     def post(self):
         have_error = False
-        self.author = self.read_secure_cookie('user_id')
+        self.author = self.user.username
         self.taskTitle = self.request.get('title')
         self.taskDescription = self.request.get('description')
         self.taskDate = self.request.get('date')
@@ -225,8 +225,7 @@ class NewTask(BlogHandler):
         if have_error:
             self.render('newtask.html', **params)
         else:
-            author = "id : "+self.author
-            task = Task(parent = task_key(), author = author, title = self.taskTitle, description = self.taskDescription, date = self.convertDate(self.taskDescription))
+            task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = self.convertDate(self.taskDescription))
             task.put()
             params['valid_task'] = "Your task has been added to the taskBoard"
             self.redirect('/')
