@@ -1,3 +1,29 @@
+30/04/2015 :
+	Today, all the team have finished dedicated tasks (almost).
+	A meeting has been made, these are the relevant points of it :
+		User : 	bind tasks to users
+				On signup, redirect on a UserPage as permalink (for now)
+				On this UserPage, display its relatives tasks
+				implements a graphic content for the page
+
+		Task :  bind task to user (both authors and participants)
+				associate comments to task
+				add action as 'participate', 'concel participation'
+				implements a graphic content for a task, on apermalinkPage (for now)
+				Potentially refer to a gmap, to select the place where the tasks will be done
+
+		Home :	displays all tasks (no sorted for now)
+				add action as 'search' to find a specific User / Task
+				add a redirection to the logged in user's Page
+				Set up Technologies library (Jquery, Bootstrap, Trello)
+
+	After this meeting, we have decided to move our project management on the trello application
+
+
+
+
+
+
 27/04/2015 :
 	Hollyday time is now finished, it's time to work !
 	Today, tasks have been clearly separated, in order to developp each part in a functionnal way; Each teammate will have a unique part to implement.
