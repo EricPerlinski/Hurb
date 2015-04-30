@@ -14,7 +14,8 @@
         <script src="js/jquery.js"></script>
         <script src="js/jquery.jscroll.js"></script>
         <script src="js/bootstrap.min.js"></script>
-
+        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
         <script src="js/bootstrap-timepicker.min.js"></script>
 
 
@@ -32,12 +33,12 @@
         <div class="login-area">
             {% if user %}
                 welcome to Hurb {{user.username}} </br>
-		Your profil :</br>
-		mail : {{user.email}}</br>
-		Phone: {{user.phone}}</br>
-		Address: {{user.address}}</br>
-		(<a class="login-link" href="/logout">logout</a>)
-		
+        		Your profil :</br>
+        		mail : {{user.email}}</br>
+        		Phone: {{user.phone}}</br>
+        		Address: {{user.address}}</br>
+        		(<a class="login-link" href="/logout">logout</a>)
+        		
             {% else %}
                 <a class="login-link" href="/login">login</a>
                 <a class="login-link" href="/signup">signup</a>
@@ -48,11 +49,20 @@
             <a class="login-link" href="/newtask">newtask</a>                            
         </div>
 
-        <div id="content">
+        <div id="content">            
             {% block content %}
+            {% endblock %}
+        </div>
+
+        <div id="tasks">
+
+            
+            {% block tasks %}
 
             {% endblock %}
         </div>
+
+
     </body>
 
 </html>

@@ -11,6 +11,7 @@ import webapp2
 import jinja2
 
 from google.appengine.ext import db
+import datetime
 
 template_dir= os.path.join(os.path.dirname(__file__),'templates');
 jinja_env=jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),autoescape=True);
@@ -54,6 +55,7 @@ class BlogHandler(webapp2.RequestHandler):
 
     def render_str(self, template, **params):
         params['user'] = self.user
+        
         t = jinja_env.get_template(template)
         return t.render(params)
 
@@ -80,6 +82,7 @@ class BlogHandler(webapp2.RequestHandler):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
         self.user = uid and Register.by_id(int(uid))
+
 
         if self.request.url.endswith('.json'):
             self.format = 'json'
@@ -147,9 +150,11 @@ def task_key(title = 'default'):
         return db.Key.from_path('task', title)
 
 class Task(db.Model):
+    author = db.StringProperty(required = True)
     title = db.StringProperty(required = True)
     description = db.TextProperty(required = True)
-    date = db.DateProperty(required = True)    
+    date = db.DateProperty(required = True)
+    hour = db.DateProperty(required = False)
 
     @classmethod
     def by_id(cls, uid):
@@ -171,8 +176,8 @@ class Task(db.Model):
                     )
 
     def render(self):
-        self._render_text = self.content.replace('\n', '<br>')
-        return render_str("task.html", t = self)
+        self._render_text = self.description.replace('\n', '<br>')
+        return render_str("task.html", task = self)
 
     def as_dict(self):
         time_fmt = '%d-%m-%Y %H:%M'
@@ -192,13 +197,16 @@ class NewTask(BlogHandler):
 
     def post(self):
         have_error = False
+        self.author = self.read_secure_cookie('user_id')
         self.taskTitle = self.request.get('title')
         self.taskDescription = self.request.get('description')
         self.taskDate = self.request.get('date')
+        self.taskhour = self.request.get('hour')
 
         params = dict(title = self.taskTitle,
                       description = self.taskDescription,
                       date = self.taskDate)
+
 
         if not self.taskTitle:
             params['error_title'] = "Please enter a Title"
@@ -214,14 +222,23 @@ class NewTask(BlogHandler):
             have_error = True
 
         #Add the new task if it doesn't have any error
-        if not have_error:
-            task = Task(parent = task_key(), title = self.taskTitle, description = self.taskDescription, date = self.taskDate)
+        if have_error:
+            self.render('newtask.html', **params)
+        else:
+            author = "id : "+self.author
+            task = Task(parent = task_key(), author = author, title = self.taskTitle, description = self.taskDescription, date = self.convertDate(self.taskDescription))
             task.put()
             params['valid_task'] = "Your task has been added to the taskBoard"
+            self.redirect('/')
 
-        self.render('newtask.html', **params)
-        
+    def convertDate(self, taskDate):
+        self.date = self.taskDate.split('/', 2)
+        converted = datetime.date(year=int(self.date[2]), month=int(self.date[0]), day=int(self.date[1]))
+        return converted
 
+    #To finish
+    def convertHour(self, taskHour):
+        self.hour = self.taskHour
 
 class PostPage(BlogHandler):
     def get(self, post_id):
@@ -260,8 +277,13 @@ class NewPost(BlogHandler):
 
 class Main(BlogHandler):
     def get(self):
-        if self.user:
+        if self.user:     
             self.render('home.html', user = self.user)
+
+            tasks = Task.all()
+            if tasks:
+                self.render('task.html', tasks = tasks)
+            
         else:
             self.render('home.html')
 
@@ -269,6 +291,7 @@ class BlogFront(BlogHandler):
     def get(self):
         posts = greetings = Post.all().order('-created')
         if self.format == 'html':
+            
             self.render('front.html', posts = posts)
         else:
             return self.render_json([p.as_dict() for p in posts])
