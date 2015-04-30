@@ -9,6 +9,15 @@ handlers:
 - url: /images
   static_dir: images
 
+- url: /_layouts
+  static_dir: _layouts
+
+- url: /less
+  static_dir: less
+
+- url: /assets
+  static_dir: assets
+
 - url: /js
   static_dir: js
 

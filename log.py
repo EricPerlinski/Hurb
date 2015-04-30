@@ -95,9 +95,9 @@ class BlogHandler(webapp2.RequestHandler):
 class Register(db.Model):
     username = db.StringProperty(required = True)
     password = db.StringProperty(required = True)
-    email = db.StringProperty(required = True)
-    phone = db.StringProperty(required = True)
-    address = db.StringProperty(required = True)
+    email = db.StringProperty()
+    phone = db.StringProperty()
+    address = db.StringProperty()
     @classmethod
     def by_id(cls, uid):
         return Register.get_by_id(uid, parent = register_key())
@@ -143,25 +143,48 @@ def register_key(name = 'default'):
 ###### TODO ####################################################################
 ###### Modify this in order to get the correct post pattern you've defined #####
 ################################################################################
+def task_key(title = 'default'):
+        return db.Key.from_path('task', title)
 
 class Task(db.Model):
     title = db.StringProperty(required = True)
     description = db.TextProperty(required = True)
-    date = db.DateTimeProperty(required = True)    
+    date = db.DateProperty(required = True)    
+
+    @classmethod
+    def by_id(cls, uid):
+        return Task.get_by_id(uid, parent = register_key())
+
+    @classmethod
+    def by_name(cls, name):
+        u = Task.all().filter('title =', name).get()
+        return u
+
+    @classmethod
+    def register(cls, ):
+        pw_hash = make_pw_hash(username, title, description, date,time)
+        return Task(parent = task_key(),
+                    title = title,
+                    description = description,
+                    date = date,
+                    time = time
+                    )
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("task.html", t = self)
 
-    
-
     def as_dict(self):
-        time_fmt = '%c'
+        time_fmt = '%d-%m-%Y %H:%M'
         d = {'title': self.title,
              'description': self.description,
-             'date': self.date.strftime(time_fmt)
+             'date': self.date.strptime(date+" "+time,time_fmt)
+
+
             }
         return d
+
+    
 
 class NewTask(BlogHandler):
     def get(self):
@@ -261,8 +284,8 @@ class Signup(BlogHandler):
         self.password = self.request.get('password')
         self.verify = self.request.get('verify')
         self.email = self.request.get('email')
-        self.phone=self.request.get('phone')
-        self.address=self.request.get('address')
+        self.phone = self.request.get('phone')
+        self.address = self.request.get('address')
 
         params = dict(username = self.username,
                       email = self.email,
