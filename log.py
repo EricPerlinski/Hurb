@@ -382,14 +382,19 @@ class SaveUser(Signup):
             u = Register.register(self.username, self.password,self.email,self.phone,self.address)
             u.put()
             self.login(u)
-            self.redirect('/')
+            self.redirect('/profil')
 
-
-
+class Profil(BlogHandler):
+	def get(self):
+		if self.user :
+			self.render('profil.html',user = self.user)
+		else:
+			self.redirect('/login')
 
 
 
 application = webapp2.WSGIApplication([('/',Main),
+									   ('/profil',Profil),
                                        ('/login',Login),
                                        ('/?(?:.json)?', BlogFront),
                                        ('/([0-9]+)(?:.json)?', PostPage),

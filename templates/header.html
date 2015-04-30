@@ -33,12 +33,19 @@
         <div class="login-area">
             {% if user %}
                 welcome to Hurb {{user.username}} </br>
+
         		Your profil :</br>
         		mail : {{user.email}}</br>
         		Phone: {{user.phone}}</br>
         		Address: {{user.address}}</br>
         		(<a class="login-link" href="/logout">logout</a>)
         		
+
+		<a class="profil-link" href="/profil">My profil</a>
+		</br>
+		(<a class="login-link" href="/logout">logout</a>)
+		
+
             {% else %}
                 <a class="login-link" href="/login">login</a>
                 <a class="login-link" href="/signup">signup</a>
