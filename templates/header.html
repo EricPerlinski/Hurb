@@ -20,50 +20,49 @@
 
 
 
-
-
-
     </head>
 
     <body>
-        <a href="/" class="main-title">
-        Help your bro' <img src="/images/Brofist-black.png" style="width:40px;height:40px">
-        </a>
 
-        <div class="login-area">
-            {% if user %}
-                welcome to Hurb {{user.username}} </br>
+        <nav class="navbar navbar-inverse">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="#">HurB !</a>
+            </div>
+            <div>
+              <ul class="nav navbar-nav">
+                <li class="active"><a href="/">Help your bro' !</a></li>
+              </ul>
+              <ul class="nav navbar-nav navbar-right">
+                {% if user %}
+                    <li><a href="/newtask">Enter a Task</a></li>   
+                    <li><a href="/profil">Home</a></li>   
+                    <li><a href="/logout"><span class="glyphicon glyphicon-user"></span> Log out</a></li> 
+                {% else %}
+                    <li><a href="/signup"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+                   <li><a href="/login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>               
+                {% endif %}                      
+              </ul>
+            </div>
+          </div>
+        </nav>
 
-        		Your profil :</br>
-        		mail : {{user.email}}</br>
-        		Phone: {{user.phone}}</br>
-        		Address: {{user.address}}</br>
-        		(<a class="login-link" href="/logout">logout</a>)
-        		
-
-		<a class="profil-link" href="/profil">My profil</a>
-		</br>
-		(<a class="login-link" href="/logout">logout</a>)
-		
-
-            {% else %}
-                <a class="login-link" href="/login">login</a>
-                <a class="login-link" href="/signup">signup</a>
-            {% endif %}
+        <div class="container">
+            <h1> Help your bro' </h1>
+            <img src="/images/Brofist-black.png" style="width:200px;height:200px">
         </div>
 
-        <div class="task-area">            
-            <a class="login-link" href="/newtask">newtask</a>                            
-        </div>
+        {% block profil %}
+
+        {% endblock %}
+
 
         <div id="content">            
             {% block content %}
             {% endblock %}
         </div>
 
-        <div id="tasks">
-
-            
+        <div id="tasks">            
             {% block tasks %}
 
             {% endblock %}

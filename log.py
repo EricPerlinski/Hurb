@@ -277,11 +277,13 @@ class NewPost(BlogHandler):
 class Main(BlogHandler):
     def get(self):
         if self.user:     
-            self.render('home.html', user = self.user)
+            
 
             tasks = Task.all()
             if tasks:
                 self.render('task.html', tasks = tasks)
+            else:
+                self.render('home.html', user = self.user)
             
         else:
             self.render('home.html')
