@@ -44,9 +44,14 @@ EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 def valid_email(email):
     return not email or EMAIL_RE.match(email)
 
-PHONE_RE = re.compile(".*?(\(?\d{3}\D{0,3}\d{3}\D{0,3}\d{4}).*?")
+PHONE_RE = re.compile(r".*?(\(?\d{3}\D{0,3}\d{3}\D{0,3}\d{4}).*?")
 def valid_phone(phone):
-    return phone and PHONE_RE.match(phone)
+    return not phone or PHONE_RE.match(phone)
+
+ADDRESS_RE = re.compile(r"[a-zA-Z0-9\.\-\,]+")
+def valid_address(address):
+    return not address or ADDRESS_RE.match(address)
+
 
 class BlogHandler(webapp2.RequestHandler):
 
@@ -337,9 +342,9 @@ class Signup(BlogHandler):
         	params['error_phone']="That's not a valid phone number"
         	have_error = True
 
-        if self.address=="":
-        	params['error_address']="This field is empty"
-        	have_error=True
+        if not valid_address(self.address):
+            params['error_address'] = "It doesn't seems to make sense."
+            have_error = True
 
         if have_error:
             self.render('signup-form.html', **params)
