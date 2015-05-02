@@ -13,9 +13,22 @@
         <p class="text-right">Scheduled on {{t.date.strftime("%d-%m-%Y %H:%M")}}</p>
     </div>
 
-    <div class="task-description"> 
-    </div>
+    <div class="container-fluid">
+      <form method="Post" name="task_interract">
 
+         <div id="interaction_btn">
+            <button type="submit" class="btn btn-default" value="comment" name="comment">Comment !</button>
+            <button type="submit" class="btn btn-default" value="participate" name="participate">Participate !</button>
+            <div style="clear:both"></div><!-- Need this to have the buttons actually inside div#buttons -->
+        </div>
+
+
+
+      </form>
+
+
+
+    </div>
   </div>
 
 

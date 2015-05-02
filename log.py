@@ -164,6 +164,9 @@ class Task(db.Model):
     description = db.TextProperty(required = True)
     #Both date and time will be in this field
     date = db.DateTimeProperty(required = True)
+    #Save the id of all users who wants to participate
+    participants = db.ListProperty(int)
+
 
     @classmethod
     def by_id(cls, uid):
@@ -191,6 +194,28 @@ class Task(db.Model):
         time_fmt = '%d-%m-%Y %H:%M'
         d = {'title': self.title,
              'description': self.description,
+             'date': self.date.strftime(time_fmt),
+             'author' : self.author
+            }
+        return d
+
+##########################################################################
+###### Comment class
+################################################################################        
+
+class Comment(db.Model):
+    task_id = db.IntegerProperty(required = True)
+    author = db.StringProperty(required = True)
+    content = db.StringProperty(required = True)
+    date = db.DateTimeProperty(required = True)    
+
+    def render(self):
+        self._render_text = self.content.replace('\n', '<br>')
+        return render_str("comment.html", comment = self)
+
+    def as_dict(self):
+        time_fmt = '%d-%m-%Y %H:%M'
+        d = {'content': self.content,
              'date': self.date.strftime(time_fmt),
              'author' : self.author
             }
@@ -294,6 +319,33 @@ class TaskPage(BlogHandler):
             self.render("taskpermalink.html", task=task)
         else:
             self.render_json(task.as_dict())
+
+    def post(self, task_id):
+        self.comment = self.request.get('comment')
+        self.participate = self.request.get('participate')
+
+
+        key = db.Key.from_path('Task',int (task_id), parent = task_key())
+        task = db.get(key)
+        if not task:
+            self.error(404)
+            return
+
+
+        #Leave a comment :
+        if self.comment:
+            com = Comment(task_id = int(task_id), author = self.user.username, content = "Just a comment test", date = datetime.datetime.now())
+            com.put()
+            self.render("taskpermalink.html", task = task, comment=com)
+
+        #Participate to the task
+        elif self.participate:
+            task.participant.append(db.Key.from_path('register', self.user.username))
+            self.render("taskpermalink.html", task = task)
+
+        else:
+            self.render("header.html", task = task)            
+
 
 
 

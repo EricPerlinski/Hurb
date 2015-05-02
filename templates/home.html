@@ -8,37 +8,7 @@
 
 {% block tasks %}
 	{% for t in tasks %}
-	  	<div class="scroll" >
-	    	<div class="task-heading">
-	      	<div class="task-title">
-	        	name : 
-	        	{{t.title}}
-	      	</div>
-	      	
-	      	<div class="task-author">
-	        	author : 
-	        	{{t.author}}
-	      	</div>
-	      
-	      	<div class="task-description">
-	        
-	        	{{t.description}}
-	      	</div>
-	      
-	      	<div class="task-date">
-	        	date : 
-	        	{{t.date}}
-	      	</div>
-	      		{% if t.hour %}
-	      		<div class="task-hour">
-	        	at : 
-	        	{{t.hour}}
-	      		</div>
-	      		{% endif %}
-	      
-	    	</div>
-	    	
-		</div>
+		{{t.render() | safe}}
 	{% endfor %}
 
 	<script type="text/javascript">

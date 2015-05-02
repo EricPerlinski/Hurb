@@ -2,4 +2,9 @@
 
 {% block tasks %}
   {{task.render() | safe}}
+
+  <p> Comments under : </p>
+  {% if comment %}
+  	{{comment.render() | safe}}
+  {% endif %} 
 {% endblock %}
