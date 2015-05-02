@@ -2,12 +2,37 @@
 
 {% block profil %}
 	{% if user %}
-	    <div class="profil-area">
-		<p>Your profil :</br></p>
-		<p>mail : {{user.email}}</br></p>
-		<p>Phone: {{user.phone}}</br></p>
-		<p>Address: {{user.address}}</br></p>
-	   </div>
-	   <a class="home-link" href="/">Home</a>
+		<aside class="span4">
+			<section id="user_info">				
+			    <div class="profil-area">
+					<p>{{user.username}}</br></p>
+					<p>mail : 
+						{% if user.email %}
+							{{user.email}}
+						{% else %}
+							not set
+						{% endif %}
+						</br>
+					</p>
+					<p>Phone : 
+						{% if user.phone %}
+							{{user.phone}}
+						{% else %}
+							not set
+						{% endif %}
+						</br>
+					</p>
+					<p>Address: 
+						{% if user.address %}
+							{{user.address}}
+						{% else %}
+							not set
+						{% endif %}
+						</br>
+					</p>
+			   	</div>
+			</section>
+		</aside>
+
 	{% endif %}
 {% endblock %}

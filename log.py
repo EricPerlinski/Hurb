@@ -494,7 +494,7 @@ class SaveUser(Signup):
 class Profil(BlogHandler):
 	def get(self):
 		if self.user :
-			self.render('profil.html',user = self.user)
+			self.render('profil.html', user = self.user, profil = "profil")
 		else:
 			self.redirect('/login')
 
