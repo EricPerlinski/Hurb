@@ -158,8 +158,8 @@ class Task(db.Model):
     author = db.StringProperty(required = True)
     title = db.StringProperty(required = True)
     description = db.TextProperty(required = True)
-    date = db.DateProperty(required = True)
-    hour = db.DateProperty(required = False)
+    #Both date and time will be in this field
+    date = db.DateTimeProperty(required = True)
 
     @classmethod
     def by_id(cls, uid):
@@ -206,9 +206,6 @@ class NewTask(BlogHandler):
         self.taskTitle = self.request.get('title')
         self.taskDescription = self.request.get('description')
         self.taskDate = self.request.get('date')
-       
-
-
 
 
         params = dict(title = self.taskTitle,
@@ -229,26 +226,63 @@ class NewTask(BlogHandler):
             params['error_date'] = "Please, set up a date"
             have_error = True
         else:
-            params['error_date'] = "Current date :" + self.taskDate
-            have_error = True
+            #Validate the date
+            convertedDate = self.changeToDate(self.taskDate)            
+            have_error = not self.validateDate(convertedDate)
+
+            if have_error :
+                params['error_date'] = "Choosen Date is not valid"
+            
+
         #Add the new task if it doesn't have any error
         if have_error:
             self.render('newtask.html', **params)
         else:
-            self.write(self.taskDate)
-            #task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = self.convertDate(self.taskDate))
-            #task.put()
-            #params['valid_task'] = "Your task has been added to the taskBoard"
-            
+            #self.write(self.taskDate)
+            task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = convertedDate)
+            task.put()
+            params['valid_task'] = "Your task has been added to the taskBoard"
 
-    def convertDate(self, taskDate):
-        self.date = self.taskDate.split('/', 2)
-        converted = datetime.date(year=int(self.date[2]), month=int(self.date[0]), day=int(self.date[1]))
-        return converted
 
-    #To finish
-    def convertHour(self, taskHour):
-        self.hour = self.taskHour
+    def changeToDate(self, taskDate):
+        #####
+        #Convert the given date to a dateTime object
+        #####
+        #Split the dd/mm/yyyy HH:ii P in two pieces        
+        self.dateAndtime = self.taskDate.split(' ', 1)
+
+        self.dateString = self.dateAndtime[0].split('/', 2)       
+
+        self.timeString = self.dateAndtime[1].split(' ', 2) #P argument is included
+        self.time = self.timeString[0].split(':', 1)
+
+        #Convert the format hour, according to the P parameter:
+        #transpose it to integer anyway
+        format = self.timeString[1]
+        if format == 'PM':
+            self.hour = int(self.time[0])+12
+        else:
+            self.hour = int(self.time[0])
+
+
+        self.date = datetime.datetime(year=int(self.dateString[2]), 
+                                month=int(self.dateString[1]),
+                                day=int(self.dateString[0]),
+                                hour=self.hour,
+                                minute=int(self.time[1]))
+
+        return self.date
+
+
+    def validateDate(self, taskDate):
+        if taskDate < datetime.datetime.now():
+            return False
+
+        return True
+
+
+
+
 
 class PostPage(BlogHandler):
     def get(self, post_id):
