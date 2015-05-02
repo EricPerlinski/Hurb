@@ -5,3 +5,46 @@
 	<h1>This is the homepage of Hurb !</h1>
 {% endblock %}
 
+
+{% block tasks %}
+	{% for t in tasks %}
+	  	<div class="scroll" >
+	    	<div class="task-heading">
+	      	<div class="task-title">
+	        	name : 
+	        	{{t.title}}
+	      	</div>
+	      	
+	      	<div class="task-author">
+	        	author : 
+	        	{{t.author}}
+	      	</div>
+	      
+	      	<div class="task-description">
+	        
+	        	{{t.description}}
+	      	</div>
+	      
+	      	<div class="task-date">
+	        	date : 
+	        	{{t.date}}
+	      	</div>
+	      		{% if t.hour %}
+	      		<div class="task-hour">
+	        	at : 
+	        	{{t.hour}}
+	      		</div>
+	      		{% endif %}
+	      
+	    	</div>
+	    	
+		</div>
+	{% endfor %}
+
+	<script type="text/javascript">
+			$('.scroll').jscroll(
+			loadingHtml: '<img src="loading.gif" alt="Loading" /> Loading...',
+    		padding: 20,
+    		nextSelector: 'a.jscroll-next:last',
+	</script>
+{% endblock %}

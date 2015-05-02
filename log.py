@@ -60,12 +60,16 @@ class BlogHandler(webapp2.RequestHandler):
 
     def render_str(self, template, **params):
         params['user'] = self.user
-        
         t = jinja_env.get_template(template)
         return t.render(params)
 
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
+
+    def render_json(self,d):
+        json_txt = json.dumps(d)
+        self.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+        self.write(json_txt)
 
     def set_secure_cookie(self, name, val):
         cookie_val = make_secure_val(val)
@@ -92,7 +96,7 @@ class BlogHandler(webapp2.RequestHandler):
         if self.request.url.endswith('.json'):
             self.format = 'json'
         else:
-            self.format = 'htlm'
+            self.format = 'html'
 
 
 #### TODO ##################################################################
@@ -176,21 +180,19 @@ class Task(db.Model):
         return Task(parent = task_key(),
                     title = title,
                     description = description,
-                    date = date,
-                    time = time
+                    date = date
                     )
 
     def render(self):
         self._render_text = self.description.replace('\n', '<br>')
-        return render_str("task.html", task = self)
+        return render_str("task.html", t = self)
 
     def as_dict(self):
         time_fmt = '%d-%m-%Y %H:%M'
         d = {'title': self.title,
              'description': self.description,
-             'date': self.date.strptime(date+" "+time,time_fmt)
-
-
+             'date': self.date.strftime(time_fmt),
+             'author' : self.author
             }
         return d
 
@@ -210,7 +212,8 @@ class NewTask(BlogHandler):
 
         params = dict(title = self.taskTitle,
                       description = self.taskDescription,
-                      date = self.taskDate)
+                      date = self.taskDate,
+                      author = self.author)
 
 
         if not self.taskTitle:
@@ -232,7 +235,7 @@ class NewTask(BlogHandler):
 
             if have_error :
                 params['error_date'] = "Choosen Date is not valid"
-            
+        
 
         #Add the new task if it doesn't have any error
         if have_error:
@@ -241,8 +244,7 @@ class NewTask(BlogHandler):
             #self.write(self.taskDate)
             task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = convertedDate)
             task.put()
-            params['valid_task'] = "Your task has been added to the taskBoard"
-
+            self.redirect('/task/%s' % str(task.key().id())) 
 
     def changeToDate(self, taskDate):
         #####
@@ -279,6 +281,19 @@ class NewTask(BlogHandler):
             return False
 
         return True
+
+class TaskPage(BlogHandler):
+    def get(self,task_id):
+        key = db.Key.from_path('Task',int (task_id), parent = task_key())
+        task = db.get(key)
+
+        if not task:
+            self.error(404)
+            return
+        if self.format == 'html':
+            self.render("taskpermalink.html", task=task)
+        else:
+            self.render_json(task.as_dict())
 
 
 
@@ -323,13 +338,8 @@ class Main(BlogHandler):
     def get(self):
         if self.user:     
             tasks = Task.all()
-            if tasks:
-                self.render('task.html', tasks = tasks)
-            else:
-                self.render('home.html', user = self.user)
-            
+            self.render('home.html', tasks = tasks)
         else:
-            
             self.render('home.html')
 
 class BlogFront(BlogHandler):
@@ -443,6 +453,7 @@ application = webapp2.WSGIApplication([('/',Main),
                                        ('/login',Login),
                                        ('/?(?:.json)?', BlogFront),
                                        ('/([0-9]+)(?:.json)?', PostPage),
+                                       ('/task/([0-9]+)(?:.json)?', TaskPage),
                                        ('/logout', Logout),
                                        ('/signup',SaveUser),
                                        ('/newtask', NewTask)],

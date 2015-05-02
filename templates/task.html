@@ -1,38 +1,22 @@
-{% extends "header.html" %}
-
-{% block tasks %}
-<h1>List of tasks ! </h1>
 
 
-{% for t in tasks %}
-  <div class="task" >
-    <div class="task-heading">
-      <div class="task-title">
-        name : 
-        {{t.title}}
-      </div>
-      <div class="task-author">
-        author : 
-        {{t.author}}
-      </div>
-      <div class="task-description">
-        
-        {{t.description}}
-      </div>
-      <div class="task-date">
-        date : 
-        {{t.date}}
-      </div>
-      {% if t.hour %}
-      <div class="task-hour">
-        at : 
-        {{t.hour}}
-      </div>
-      {% endif %}
-      
+<div class="task">
+  <div class="task-heading">
+    <div class="task-title">
+      title : {{t.title}}
+    </div>
+
+    <div class="task-date">
+      date : {{t.date.strftime("%d-%m-%Y %H:%M")}}
     </div>
   </div>
-  <br><br>
-{% endfor %}
 
-{% endblock %}
+  <div class="task-description"> description :
+    {{t._render_text | safe}}
+  </div>
+
+  <div class="task-author">
+    author : {{t.author}}
+  </div>
+</div>
+
