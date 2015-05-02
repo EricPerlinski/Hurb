@@ -288,8 +288,6 @@ class NewPost(BlogHandler):
 class Main(BlogHandler):
     def get(self):
         if self.user:     
-            
-
             tasks = Task.all()
             if tasks:
                 self.render('task.html', tasks = tasks)
@@ -297,6 +295,7 @@ class Main(BlogHandler):
                 self.render('home.html', user = self.user)
             
         else:
+            
             self.render('home.html')
 
 class BlogFront(BlogHandler):
