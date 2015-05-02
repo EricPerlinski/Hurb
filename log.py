@@ -322,7 +322,7 @@ class TaskPage(BlogHandler):
 
     def post(self, task_id):
         self.comment = self.request.get('comment')
-        self.participate = self.request.get('participate')
+        self.delete = self.request.get('delete')
 
 
         key = db.Key.from_path('Task',int (task_id), parent = task_key())
@@ -339,9 +339,9 @@ class TaskPage(BlogHandler):
             self.render("taskpermalink.html", task = task, comment=com)
 
         #Participate to the task
-        elif self.participate:
-            task.participant.append(db.Key.from_path('register', self.user.username))
-            self.render("taskpermalink.html", task = task)
+        elif self.delete:
+            task.delete()            
+            self.redirect('/')
 
         else:
             self.render("header.html", task = task)            
