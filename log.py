@@ -206,7 +206,10 @@ class NewTask(BlogHandler):
         self.taskTitle = self.request.get('title')
         self.taskDescription = self.request.get('description')
         self.taskDate = self.request.get('date')
-        self.taskhour = self.request.get('hour')
+       
+
+
+
 
         params = dict(title = self.taskTitle,
                       description = self.taskDescription,
@@ -225,15 +228,18 @@ class NewTask(BlogHandler):
         if not self.taskDate:
             params['error_date'] = "Please, set up a date"
             have_error = True
-
+        else:
+            params['error_date'] = "Current date :" + self.taskDate
+            have_error = True
         #Add the new task if it doesn't have any error
         if have_error:
             self.render('newtask.html', **params)
         else:
-            task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = self.convertDate(self.taskDescription))
-            task.put()
-            params['valid_task'] = "Your task has been added to the taskBoard"
-            self.redirect('/')
+            self.write(self.taskDate)
+            #task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = self.convertDate(self.taskDate))
+            #task.put()
+            #params['valid_task'] = "Your task has been added to the taskBoard"
+            
 
     def convertDate(self, taskDate):
         self.date = self.taskDate.split('/', 2)

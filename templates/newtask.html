@@ -16,29 +16,37 @@
         <textarea name="description">{{description}}</textarea>{{error_description}}
       </div>
 
+      
       <div class="form-group">
-        <label for="date"> Date </label>
-        <input type="text" id="datepicker" name="date" value="{{date}}"> {{error_date}}
-          <script type="text/javascript">
-            $( "#datepicker" ).datepicker();
-          </script>
-      </div>
-
-      <div class="form-group">
-        <label for="hour"> Hour </label>
-        <div class="input-append bootstrap-timepicker">
-              <input id="timepicker1" type="text" name="hour" class="input-small">
-              <span class="add-on"><i class="icon-time"></i></span>
-              {{error_time}}
-              <script type="text/javascript">
-                $('#timepicker1').timepicker();
-              </script>
+        <div class="row">
+          <div  class="col-xs-3">
+            <label class="control-label" for="date"> When ? {{error_date}} {{convert_date}} </label>
+            <div class="input-group date" id="dp3" data-date="2015-05-01T15:25:00Z">
+              <input class="form-control" name="date" type="text" readonly="" value="{{datetime}}"> 
+              <span class="input-group-addon"><i class="glyphicon glyphicon-remove"></i></span>
+              <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+            </div>
+          </div>
         </div>
       </div>
-
-      <button type="submit" class="btn btn-default" value="submit"> Create task </button>
+      
+      <div class="form-group">
+        <div class="col-xs-3">
+          <button type="submit" class="btn btn-default" value="submit"> Create task </button>
+        </div>
+      </div>
     </form>
 
+    
+ 
+<script type="text/javascript">
+    $("#dp3").datetimepicker({
+        format: "dd/mm/yyyy HH:ii P",
+        showMeridian: true,
+        autoclose: true,
+        todayBtn: true
+    });
+</script>   
 
     <p>{{valid_task}}</p>
 
