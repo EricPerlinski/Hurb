@@ -162,9 +162,6 @@ class NewTask(HurbHandler):
             self.redirect('/task/%s' % str(task.key().id())) 
 
 
-
-
-
 class TaskPage(HurbHandler):
     def get(self,task_id):
         key = db.Key.from_path('Task',int (task_id), parent = task_key())
