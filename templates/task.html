@@ -17,14 +17,20 @@
     </div>
 
     <div class="container-fluid">
-      <form method="Post" name="task_interract">
-
          <div id="interaction_btn">
-            <button type="submit" class="btn btn-default" value="comment" name="comment">Comment !</button>
-            <button type="submit" class="btn btn-default" value="delete" name="delete">Delete the task.</button>
+            <a href="/task/{{t.key.id()}}" lass="btn btn-default" id="commentBtn" value="seeCommentBtn" name="seeCommentBtn">Display comments</button>
+            <button type="button" class="btn btn-default" id="commentBtn" value="commentBtn" name="commentBtn">Comment !</button>
+            <button type="button" class="btn btn-default" value="delete" name="delete">Delete the task.</button>
             <div style="clear:both"></div><!-- Need this to have the buttons actually inside div#buttons -->
         </div>
-      </form>
+
+        <form id="commentForm" class="commentForm" name="commentForm" method="POST" >
+              <label> Add a comment </label> <br>
+              <input type='hidden' value="{{ t.key().id() }}" name="task_id"/>
+              <textarea name="commentContent"></textarea><br>
+
+              <button type="submit" class="btn btn-default" value="submit" name="commentSend">Add a Comment !</button>
+        </form>
     </div>
   </div>
 
@@ -32,4 +38,19 @@
 
 </li>
 
+
+
+
+<script type="text/javascript">
+    $(document).ready(function(e){
+
+        $(".commentForm").hide();
+
+        $("#commentBtn").click(function(e) {
+            //alert("clicked");
+            $(".commentForm").show();
+            e.preventDefault();
+        });
+    });
+</script>
 

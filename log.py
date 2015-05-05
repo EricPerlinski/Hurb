@@ -394,6 +394,27 @@ class Main(BlogHandler):
         else:
             self.render('home.html')
 
+    def post(self):
+        self.comment = self.request.get('commentSend')
+        self.content = self.request.get('commentContent')        
+        self.task_id = self.request.get('task_id')
+
+
+        if self.comment and self.content and self.task_id:
+            com = Comment(task_id = int(self.task_id), author = self.user.username, content = self.content, date = datetime.datetime.now())
+            com.put()        
+            self.response.out.write("Comm enregistre")
+
+        self.response.out.write("Comm saute\n")
+        self.response.out.write("com: "+self.comment+"\n")   
+        self.response.out.write("content :"+self.content+"\n")   
+        self.response.out.write("task :"+self.task_id)   
+        self.render('header.html');
+
+
+
+
+
 class BlogFront(BlogHandler):
     def get(self):
         posts = greetings = Post.all().order('-created')
