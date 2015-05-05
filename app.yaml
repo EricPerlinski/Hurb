@@ -19,7 +19,7 @@ handlers:
   static_dir: fonts
 
 - url: /.*
-  script: log.application
+  script: main.application
 
 libraries:
 - name: jinja2
