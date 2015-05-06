@@ -89,7 +89,7 @@ class HurbHandler(webapp2.RequestHandler):
 class Main(HurbHandler):
     def get(self):
         if self.user:     
-            tasks = Task.all()
+            tasks = Task.all() #recupere un object query --> passer par un gqlquery
             self.render('home.html', tasks = tasks)            
         else:
             self.render('home.html')
