@@ -73,6 +73,8 @@ class Task(db.Model):
         u = Task.all().filter('title =', name).get()
         return u
 
+
+
     @classmethod
     def register(cls, ):
         pw_hash = make_pw_hash(username, title, description, date,time)
@@ -85,6 +87,15 @@ class Task(db.Model):
     def render(self):
         self._render_text = self.description.replace('\n', '<br>')
         return render_str("task.html", t = self)
+
+    def get_number_of_comment(self,jinjaid):
+        comments = Comment.all()
+        count = 0
+        for i in comments:
+            if i.gettaskid() == jinjaid:
+                count = count+1
+
+        return count
 
     
     def as_dict(self):

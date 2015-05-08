@@ -12,10 +12,5 @@
 {% block tasks %}
 	{% for t in tasks %}
 		{{t.render() | safe}}
-		{% for c in comments %}
-			{% if c.gettaskid() == t.key().id() %}
-				{{ c.render() | safe}}
-			{% endif %}
-		{% endfor %}
 	{% endfor %}
 {% endblock %}
