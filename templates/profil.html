@@ -45,7 +45,7 @@
 			<h3>My Tasks</br></h3>
 			{% if UserTask %}
 			  {%for usertask in UserTask %} 
-			  <p> {{usertask.title}}</p>
+			  <p> {{usertask.render() | safe }}</p>
 			  {% endfor %}
 			{% endif %}
 		</div>
