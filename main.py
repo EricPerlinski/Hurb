@@ -314,11 +314,16 @@ class Modify (Signup):
         else :
             self.redirect('/login')
 
-
+class Delete (HurbHandler):
+    def get(self):
+        Bro.Deleted(self.user.username)
+        self.user=None
+        self.redirect('/')
 
 
 application = webapp2.WSGIApplication([('/',Main),
 									   ('/profil',Profil),
+                                       ('/delete',Delete),
                                        ('/login',Login),
                                        ('/task/([0-9]+)(?:.json)?', TaskPage),
                                        ('/logout', Logout),
