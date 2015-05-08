@@ -22,7 +22,7 @@ def render_str(template, **params):
 class Comment(db.Model):
     task_id = db.IntegerProperty(required = True)
     author = db.StringProperty(required = True)
-    content = db.StringProperty(required = True)
+    content = db.StringProperty(required = True, multiline = True )
     date = db.DateTimeProperty(required = True)
 
     @classmethod
@@ -60,7 +60,7 @@ def task_key(title = 'default'):
 class Task(db.Model):
     author = db.StringProperty(required = True)
     title = db.StringProperty(required = True)
-    description = db.TextProperty(required = True)    
+    description = db.StringProperty(required = True, multiline = True)    
     date = db.DateTimeProperty(required = True) #Both date and time will be in this field    
     participants = db.ListProperty(int)			#Save the id of all users who wants to participate
 
@@ -111,6 +111,15 @@ class Task(db.Model):
     def GiveUserTask(cls,username):
         TaskUser= db.GqlQuery('Select * from Task where author= :1',username)
         return TaskUser.run()
+
+    def deleteComments(cls, task_id):
+        #Delete all comments relative to the Task
+        
+        taskComments = Comment.all()
+        taskComments.filter("task_id =", task_id)               
+              
+        for comment in taskComments.run():
+            comment.delete()
 
 
 

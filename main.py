@@ -111,7 +111,7 @@ class Main(HurbHandler):
         else:
             self.response.out.write("Comm saute\n")
 
-                    #Delete the task
+        #Delete the task with its comments
         if self.delete and self.task_id:
             key = db.Key.from_path('Task',int (self.task_id), parent = task_key())            
             task = db.get(key)
@@ -119,7 +119,8 @@ class Main(HurbHandler):
             if task is not None:                
                 creator = task.author;
                 if self.user.username == creator:
-                    task.delete()
+                    task.deleteComments(int(self.task_id))
+                    db.delete(key)
                     self.redirect('/')
                 else:
                     self.response.out.write("not the creator of the task")
