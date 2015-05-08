@@ -16,19 +16,24 @@
 
     <div class="container-fluid">
          <div id="interaction_btn">
-            <a href="/task/{{t.key().id()}}" class="btn btn-default" id="commentBtn" value="seeCommentBtn" name="seeCommentBtn">Display comments</a>            
-            <button type="button" class="btn btn-default" id="commentBtn" value="commentBtn" name="commentBtn">Comment !</button>
-            <button type="button" class="btn btn-default" value="delete" name="delete">Delete the task.</button>
+            <a href="/task/{{t.key().id()}}" class="btn btn-default" id="commentBtn" value="seeCommentBtn" name="seeCommentBtn">Display task</a>            
+            <button type="button" class="btn btn-default" id="commentBtn{{t.key().id()}}"  name="commentBtn">Comment !</button>
+            <button type="button" class="btn btn-default" id="deleteBtn{{t.key().id()}}" name="deleteBtn">Delete the task.</button>
             <div style="clear:both"></div><!-- Need this to have the buttons actually inside div#buttons -->
         </div>
 
-        <form id="commentForm" class="commentForm" name="commentForm" method="POST" >
+        <form id="commentForm{{t.key().id()}}" class="commentForm" name="commentForm" method="POST" >
               <label> Add a comment </label> <br>
               <input type='hidden' value="{{ t.key().id() }}" name="task_id"/>
               <textarea name="commentContent"></textarea><br>
-
               <button type="submit" class="btn btn-default" value="submit" name="commentSend">Add a Comment !</button>
         </form>
+        <form id="deleteForm{{t.key().id()}}" class="deleteForm" name="deleteForm" method="POST" >
+              <label> Are you sure you want to delete this stask ? </label> <br>
+              <input type='hidden' value="{{ t.key().id() }}" name="task_id"/>
+              <button type="submit" class="btn btn-danger" value="submit" name="deleteTask">DELETE</button>
+        </form>
+
     </div>
     
   </div>
@@ -41,12 +46,19 @@
     $(document).ready(function(e){
 
         $(".commentForm").hide();
+        $(".deleteForm").hide();
 
-        $("#commentBtn").click(function(e) {
+        $(document.getElementById("commentBtn{{ t.key().id() }}")).click(function(e) {
             //alert("clicked");
-            $(".commentForm").show();
+            $(document.getElementById("commentForm{{ t.key().id() }}")).show();
             e.preventDefault();
         });
+
+        $(document.getElementById("deleteBtn{{ t.key().id() }}")).click(function(e) {        
+            //alert("clicked");
+            $(document.getElementById("deleteForm{{ t.key().id() }}")).show();            
+            e.preventDefault();
+        });  
     });
 </script>
 
