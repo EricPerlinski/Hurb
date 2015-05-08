@@ -12,6 +12,14 @@
                 </h4>
 
         <p class="text-right">Scheduled on {{t.date.strftime("%d-%m-%Y %H:%M")}}</p>
+
+        <p> Comments : 
+          {% for c in comments%}
+          <p>
+            {{c.render() | safe}}
+          </p>
+          {% endfor %}
+        </p>
     </div>
 
     <div class="container-fluid">
