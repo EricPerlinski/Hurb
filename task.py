@@ -86,15 +86,7 @@ class Task(db.Model):
         self._render_text = self.description.replace('\n', '<br>')
         return render_str("task.html", t = self)
 
-    def getnumberofcomment(self):
-        comments = Comment.all()
-        count = 0
-        for i in comments:
-            if i.gettaskid() = self.key().id():
-                count = count+1
-
-        return count
-
+    
     def as_dict(self):
         time_fmt = '%d-%m-%Y %H:%M'
         d = {'title': self.title,

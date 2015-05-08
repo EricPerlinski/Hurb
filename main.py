@@ -108,6 +108,8 @@ class Main(HurbHandler):
             com = Comment(task_id = int(self.task_id), author = self.user.username, content = self.content, date = datetime.datetime.now())
             com.put()        
             self.response.out.write("Comm enregistre")
+        else:
+            self.response.out.write("Comm saute\n")
 
                     #Delete the task
         if self.delete and self.task_id:
@@ -127,8 +129,6 @@ class Main(HurbHandler):
                 self.redirect('/')
 
 
-
-        self.response.out.write("Comm saute\n")
         self.response.out.write("com: "+self.comment+"\n")   
         self.response.out.write("content :"+self.content+"\n")   
         self.response.out.write("task :"+self.task_id)   
