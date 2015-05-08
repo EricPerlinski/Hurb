@@ -31,8 +31,17 @@
 						</br>
 					</p>
 			   	</div>
+			   <a href="/profil/modify" class="btn btn-default">modify</a>
 			</section>
 		</aside>
-
+		
+		<div class="profil-area">
+			<h3>My Tasks</br></h3>
+			{% if UserTask %}
+			  {%for usertask in UserTask %} 
+			  <p> {{usertask.title}}</p>
+			  {% endfor %}
+			{% endif %}
+		</div>
 	{% endif %}
 {% endblock %}

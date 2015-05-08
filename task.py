@@ -83,6 +83,10 @@ class Task(db.Model):
              'author' : self.author
             }
         return d
+    @classmethod
+    def GiveUserTask(cls,username):
+        TaskUser= db.GqlQuery('Select * from Task where author= :1',username)
+        return TaskUser.run()
 
 
 

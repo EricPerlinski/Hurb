@@ -39,3 +39,25 @@ class Bro(db.Model):
         u = cls.by_name(name)
         if u and valid_pw(name, pw, u.password):
             return u
+
+    @classmethod
+    def update(cls,user,newusername,newpassord,newemail,newphone,newaddress):
+        OldUsername=user.username
+        ListUser= db.GqlQuery('Select * from Bro where username= :1',OldUsername)
+        result=ListUser.get()
+        setattr(result,'username',newusername)
+        user.username=newusername
+        setattr(result,'password',make_pw_hash(newusername,newpassord))
+        user.password=make_pw_hash(newusername,newpassord)
+        setattr(result,'email',newemail)
+        user.email=newemail
+        setattr(result,'phone',newphone)
+        user.phone=newphone
+        setattr(result,'address',newaddress)
+        user.adrdress=newaddress
+        result.put()
+        TaskAuthor= db.GqlQuery('Select * from Task where author= :1',OldUsername)
+        results=TaskAuthor.run()
+        for result in results:
+            setattr(result,'author',newusername)
+            result.put()

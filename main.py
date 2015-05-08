@@ -89,7 +89,7 @@ class HurbHandler(webapp2.RequestHandler):
 class Main(HurbHandler):
     def get(self):
         if self.user:     
-            tasks = Task.all() #recupere un object query --> passer par un gqlquery
+            tasks = Task.all()
             self.render('home.html', tasks = tasks)            
         else:
             self.render('home.html')
@@ -287,11 +287,32 @@ class SaveUser(Signup):
             self.redirect('/profil')
 
 class Profil(HurbHandler):
-	def get(self):
-		if self.user :
-			self.render('profil.html', user = self.user, profil = "profil")
-		else:
-			self.redirect('/login')
+    def get(self):
+        if self.user :
+            UserTask=Task.GiveUserTask(self.user.username)
+            self.render('profil.html', user = self.user, profil = "profil",UserTask=UserTask)
+        else:
+            self.redirect('/login')
+
+class Modify (Signup):
+    def get (self):
+        if self.user:
+            self.render('signup-form.html',user = self.user)
+        else :
+            self.redirect('/login')
+
+    def done(self):
+        if self.user:
+            u = Bro.by_name(self.username)
+            if u:
+                msg = 'That user already exists.'
+                self.render('signup-form.html', error_username = msg)
+            else:
+                self.user.update(self.user,self.username,self.password,self.email,self.phone,self.address)
+                UserTask=Task.GiveUserTask(self.user.username)
+                self.render('profil.html', user = self.user, profil = "profil",UserTask=UserTask)
+        else :
+            self.redirect('/login')
 
 
 
@@ -302,5 +323,6 @@ application = webapp2.WSGIApplication([('/',Main),
                                        ('/task/([0-9]+)(?:.json)?', TaskPage),
                                        ('/logout', Logout),
                                        ('/signup',SaveUser),
-                                       ('/newtask', NewTask)],
+                                       ('/newtask', NewTask),
+                                       ('/profil/modify', Modify)],
                                       debug=True)
