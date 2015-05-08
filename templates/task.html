@@ -1,6 +1,6 @@
 
 <li class = "task">
-  <div class="jumbotron" style="padding:15px; margin:15px;border:1px;border-style:solid;">
+  <!--<div class="jumbotron" style="padding:15px; margin:15px;border:1px;border-style:solid;">
     <div class="task_header">
       <h2>{{t.title}} : <br><small>  Published by {{t.author}}</small></h2>       
     </div>
@@ -19,7 +19,7 @@
             <a href="/task/{{t.key().id()}}" class="btn btn-default" id="commentBtn" value="seeCommentBtn" name="seeCommentBtn">Display comments</a>            
             <button type="button" class="btn btn-default" id="commentBtn" value="commentBtn" name="commentBtn">Comment !</button>
             <button type="button" class="btn btn-default" value="delete" name="delete">Delete the task.</button>
-            <div style="clear:both"></div><!-- Need this to have the buttons actually inside div#buttons -->
+            <div style="clear:both"></div><!-- Need this to have the buttons actually inside div#buttons 
         </div>
 
         <form id="commentForm" class="commentForm" name="commentForm" method="POST" >
@@ -31,7 +31,44 @@
         </form>
     </div>
     
-  </div>
+  </div>-->
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="row clearfix">
+				<div class="col-md-2 column">
+					<img class="img-circle" alt="140x140" src="http://lorempixel.com/140/140/"> <span class="label label-default">{{t.author}}</span>
+				</div>
+				<div class="col-md-6 column">
+					 <span class="label label-default">Label</span>
+					<h2>
+						Heading
+					</h2>
+					<p>
+						Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+					</p>
+					<p>
+						<a class="btn" href="#">View details »</a>
+					</p>
+					<div class="btn-group">
+						 <button class="btn btn-default" type="button"><em class="glyphicon glyphicon-align-left"></em> Left</button> <button class="btn btn-default" type="button"><em class="glyphicon glyphicon-align-center"></em> Center</button> <button class="btn btn-default" type="button"><em class="glyphicon glyphicon-align-right"></em> Right</button> <button class="btn btn-default" type="button"><em class="glyphicon glyphicon-align-justify"></em> Justify</button>
+					</div>
+				</div>
+				<div class="col-md-4 column">
+					<h2>
+						Heading
+					</h2>
+					<p>
+						Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+					</p>
+					<p>
+						<a class="btn" href="#">View details »</a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 </li>
 
 
