@@ -23,7 +23,16 @@ class Comment(db.Model):
     task_id = db.IntegerProperty(required = True)
     author = db.StringProperty(required = True)
     content = db.StringProperty(required = True)
-    date = db.DateTimeProperty(required = True)    
+    date = db.DateTimeProperty(required = True)
+
+    @classmethod
+    def by_id(cls, uid):
+        return Comment.get_by_id(uid, parent = register_key())
+
+    @classmethod
+    def by_taskid(cls, taskid):
+        u = Comment.all().filter('task_id =', taskid).get()
+        return u    
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -83,6 +92,7 @@ class Task(db.Model):
              'author' : self.author
             }
         return d
+
     @classmethod
     def GiveUserTask(cls,username):
         TaskUser= db.GqlQuery('Select * from Task where author= :1',username)

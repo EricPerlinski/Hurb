@@ -91,7 +91,8 @@ class Main(HurbHandler):
         self.response.out.write("getMainPage")
         if self.user:   
             tasks = Task.all()
-            self.render('home.html', tasks = tasks)            
+            comments = Comment.all()
+            self.render('home.html', tasks = tasks, comments = comments)            
         else:
             self.render('home.html')
 
@@ -132,7 +133,9 @@ class Main(HurbHandler):
         self.response.out.write("content :"+self.content+"\n")   
         self.response.out.write("task :"+self.task_id)   
 
-        self.render('header.html');
+        tasks = Task.all()
+        comments = Comment.all()
+        self.render('home.html', tasks = tasks, comments = comments) 
 
 
 
@@ -189,12 +192,14 @@ class TaskPage(HurbHandler):
     def get(self,task_id):
         key = db.Key.from_path('Task',int (task_id), parent = task_key())
         task = db.get(key)
+        ListComment= db.GqlQuery('Select * from Comment where task_id= :1',task_id)
+        comments=ListComment.get()
 
         if not task:
             self.error(404)
             return
 
-        self.render("taskpermalink.html", task=task)
+        self.render("taskpermalink.html", task=task,comments = comments)
 
     def post(self, task_id):
         self.comment = self.request.get('comment')
@@ -210,7 +215,9 @@ class TaskPage(HurbHandler):
         if self.comment:
             com = Comment(task_id = int(task_id), author = self.user.username, content = "Just a comment test", date = datetime.datetime.now())
             com.put()
-            self.render("taskpermalink.html", task = task, comment=com)
+            ListComment= db.GqlQuery('Select * from Comment where task_id= :1',task_id)
+            comments=ListComment.get()
+            self.render("taskpermalink.html", task = task, comment=com , comments = comments)
         
 
 

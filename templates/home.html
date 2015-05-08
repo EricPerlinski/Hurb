@@ -5,16 +5,11 @@
 	<h1>This is the homepage of Hurb !</h1>
 {% endblock %}
 
-
+{% for c in comments %}
+	{{ c.render() | safe}}
+{% endfor %}
 {% block tasks %}
 	{% for t in tasks %}
 		{{t.render() | safe}}
 	{% endfor %}
-
-	<script type="text/javascript">
-			$('.scroll').jscroll(
-			loadingHtml: '<img src="loading.gif" alt="Loading" /> Loading...',
-    		padding: 20,
-    		nextSelector: 'a.jscroll-next:last',
-	</script>
 {% endblock %}
