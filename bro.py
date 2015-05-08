@@ -61,3 +61,9 @@ class Bro(db.Model):
         for result in results:
             setattr(result,'author',newusername)
             result.put()
+
+    @classmethod
+    def Deleted(cls,usern):
+        userToDeleted = db.GqlQuery('Select * from Bro where username=:1',usern)
+        if userToDeleted :
+          userToDeleted[0].delete()

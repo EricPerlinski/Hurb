@@ -32,6 +32,12 @@
 					</p>
 			   	</div>
 			   <a href="/profil/modify" class="btn btn-default">modify</a>
+			   <a  class="btn btn-default" id="sureButton">delete</a>
+			   <div id="sure">
+				<p> Are you sure you want to delete your account?  </p>
+				<a  href="/delete" class="btn btn-default" id="yes">yes</a>
+				<a  class="btn btn-default" id="no">no</a>
+			   </div>
 			</section>
 		</aside>
 		
@@ -39,9 +45,26 @@
 			<h3>My Tasks</br></h3>
 			{% if UserTask %}
 			  {%for usertask in UserTask %} 
-			  <p> {{usertask.title}}</p>
+			  <p> {{usertask.render() | safe }}</p>
 			  {% endfor %}
 			{% endif %}
 		</div>
+<script type="text/javascript">
+    $(document).ready(function(e){
+        $("#sure").hide();
+        $("#sureButton").click(function(e) {
+            //alert("clicked");
+            $("#sure").show();
+            e.preventDefault();
+        });
+        $("#no").click(function(e) {
+            //alert("clicked");
+            $("#sure").hide();
+            e.preventDefault();
+        });
+	
+    });
+</script>
 	{% endif %}
 {% endblock %}
+
