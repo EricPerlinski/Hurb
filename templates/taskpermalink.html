@@ -4,7 +4,9 @@
   {{task.render() | safe}}
 
   <p> Comments under : </p>
-  {% if comment %}
-  	{{comment.render() | safe}}
-  {% endif %} 
+  {% for c in comments %}
+  	{% if c.gettaskid() == task.key().id() %}
+  		{{c.render() | safe}}
+  	{% endif %}
+  {% endfor %} 
 {% endblock %}

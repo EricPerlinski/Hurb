@@ -192,8 +192,7 @@ class TaskPage(HurbHandler):
     def get(self,task_id):
         key = db.Key.from_path('Task',int (task_id), parent = task_key())
         task = db.get(key)
-        ListComment= db.GqlQuery('Select * from Comment where task_id= :1',task_id)
-        comments=ListComment.get()
+        comments = Comment.all()
 
         if not task:
             self.error(404)
@@ -215,8 +214,7 @@ class TaskPage(HurbHandler):
         if self.comment:
             com = Comment(task_id = int(task_id), author = self.user.username, content = "Just a comment test", date = datetime.datetime.now())
             com.put()
-            ListComment= db.GqlQuery('Select * from Comment where task_id= :1',task_id)
-            comments=ListComment.get()
+            comments = Comment.all()
             self.render("taskpermalink.html", task = task, comment=com , comments = comments)
         
 
