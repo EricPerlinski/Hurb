@@ -88,16 +88,19 @@ class HurbHandler(webapp2.RequestHandler):
 
 class Main(HurbHandler):
     def get(self):
-        if self.user:     
+        self.response.out.write("getMainPage")
+        if self.user:   
             tasks = Task.all()
             self.render('home.html', tasks = tasks)            
         else:
             self.render('home.html')
 
     def post(self):
+        self.response.out.write("postMainPage")
         self.comment = self.request.get('commentSend')
         self.content = self.request.get('commentContent')        
         self.task_id = self.request.get('task_id')
+        self.delete = self.request.get('deleteTask')
 
 
         if self.comment and self.content and self.task_id:
@@ -105,10 +108,30 @@ class Main(HurbHandler):
             com.put()        
             self.response.out.write("Comm enregistre")
 
+                    #Delete the task
+        if self.delete and self.task_id:
+            key = db.Key.from_path('Task',int (self.task_id), parent = task_key())            
+            task = db.get(key)
+            #Get the username of the creator 
+            if task is not None:                
+                creator = task.author;
+                if self.user.username == creator:
+                    task.delete()
+                    self.redirect('/')
+                else:
+                    self.response.out.write("not the creator of the task")
+                    self.redirect('/')
+            else:
+                self.response.out.write("task is nonetype")
+                self.redirect('/')
+
+
+
         self.response.out.write("Comm saute\n")
         self.response.out.write("com: "+self.comment+"\n")   
         self.response.out.write("content :"+self.content+"\n")   
         self.response.out.write("task :"+self.task_id)   
+
         self.render('header.html');
 
 
@@ -175,8 +198,7 @@ class TaskPage(HurbHandler):
 
     def post(self, task_id):
         self.comment = self.request.get('comment')
-        self.delete = self.request.get('delete')
-
+        
 
         key = db.Key.from_path('Task',int (task_id), parent = task_key())
         task = db.get(key)
@@ -184,17 +206,16 @@ class TaskPage(HurbHandler):
             self.error(404)
             return
 
-
         #Leave a comment :
         if self.comment:
             com = Comment(task_id = int(task_id), author = self.user.username, content = "Just a comment test", date = datetime.datetime.now())
             com.put()
             self.render("taskpermalink.html", task = task, comment=com)
+        
+
 
         #Participate to the task
-        elif self.delete:
-            task.delete()            
-            self.redirect('/')
+        
 
         else:
             self.render("header.html", task = task)   

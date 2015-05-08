@@ -67,5 +67,3 @@ class Bro(db.Model):
         userToDeleted = db.GqlQuery('Select * from Bro where username=:1',usern)
         if userToDeleted :
           userToDeleted[0].delete()
-
-        
