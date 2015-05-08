@@ -314,6 +314,11 @@ class Modify (Signup):
         else :
             self.redirect('/login')
 
+class Delete (HurbHandler):
+    def get(self):
+        Bro.Deleted(self.user.username)
+        self.user=None
+        self.redirect('/')
 
 
 
