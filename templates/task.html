@@ -19,7 +19,12 @@
             <a class="btn" href="/task/{{t.key().id()}}">View Task »</a>
           </p>
           <div class="btn-group">
-             <button class="btn btn-default" type="button"><em class="glyphicon glyphicon-align-left"></em> Participate</button> 
+              
+            <button class="btn btn-default" type="button" id="participateBtn{{t.key().id()}}" name="participateBtn">
+              <em class="glyphicon glyphicon-align-left"></em> 
+              Participate
+            </button> 
+              
              <button class="btn btn-default" type="button" id="commentBtn{{t.key().id()}}" value="commentBtn" name="commentBtn">
                 <em class="glyphicon glyphicon-align-center"></em> 
                 Add a comment
@@ -30,9 +35,18 @@
                 Delete the task
               </button>
 
-              <form id="commentForm{{t.key().id()}}" class="commentForm" name="commentForm" method="POST" >
+              <p id="participateStatus{{ t.key().id() }}"></p>
+
+              <!-- forms -->
+
+              <form id="participateForm{{t.key().id()}}" class="participateForm" name="participateForm" method="POST" >
                 <input type='hidden' value="{{ t.key().id() }}" name="task_id"/>
-                
+                <label> Click the button below if you want to participate </label> <br>  
+                <button type="submit" class="btn btn-default" value="submit" name="participateTask">Participate !</button>                
+              </form>
+
+              <form id="commentForm{{t.key().id()}}" class="commentForm" name="commentForm" method="POST" >
+                <input type='hidden' value="{{ t.key().id() }}" name="task_id"/>                
                 <textarea name="commentContent" style="resize:none;"></textarea><br>
                 <button type="submit" class="btn btn-default" value="submit" name="commentSend">Add a Comment !</button>
               </form>
@@ -50,7 +64,7 @@
           </h3>
           <p>
             The {{t.date.strftime("%d-%m-%Y %H:%M")}} <br>
-            Participants : <br>
+            Participants : {{ t.getNumberOfParticipants(t.key().id()) }} <br>
             {%if t.get_number_of_comment(t.key().id()) > 0 %}
               Number of comments : {{t.get_number_of_comment(t.key().id())}} <br/>
             {% endif %}
@@ -71,18 +85,31 @@
 
         $(".commentForm").hide();
         $(".deleteForm").hide();
+        $(".participateForm").hide();
 
         $(document.getElementById("commentBtn{{ t.key().id() }}")).click(function(e) {
             $(".deleteForm").hide();
+            $(".participateForm").hide();
             $(document.getElementById("commentForm{{ t.key().id() }}")).show();
             e.preventDefault();
         });
 
         $(document.getElementById("deleteBtn{{ t.key().id() }}")).click(function(e) {                    
             $(".commentForm").hide();
+            $(".participateForm").hide();
             $(document.getElementById("deleteForm{{ t.key().id() }}")).show();            
             e.preventDefault();
-        });  
+        });
+
+        $(document.getElementById("participateBtn{{ t.key().id() }}")).click(function(e) {                    
+            $(".commentForm").hide();
+            $(".deleteForm").hide();
+            $(document.getElementById("participateForm{{ t.key().id() }}")).show();     
+            $(document.getElementById("participateForm{{ t.key().id() }}")).innerHTML = "You have been added as a participant to this task !";
+            e.preventDefault();
+        });
+
+
     });
 </script>
 

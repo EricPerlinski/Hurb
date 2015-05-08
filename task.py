@@ -62,7 +62,7 @@ class Task(db.Model):
     title = db.StringProperty(required = True)
     description = db.StringProperty(required = True, multiline = True)    
     date = db.DateTimeProperty(required = True) #Both date and time will be in this field    
-    participants = db.ListProperty(int)			#Save the id of all users who wants to participate
+    participants = db.StringListProperty()		#Save the username of all users who wants to participate
 
     @classmethod
     def by_id(cls, uid):
@@ -94,8 +94,13 @@ class Task(db.Model):
         for i in comments:
             if i.gettaskid() == jinjaid:
                 count = count+1
-
         return count
+
+    @classmethod
+    def getNumberOfParticipants(self, jinjaid):
+        key = db.Key.from_path('Task',int (jinjaid), parent = task_key())            
+        task = db.get(key)
+        return len(task.participants)
 
     
     def as_dict(self):
@@ -113,13 +118,21 @@ class Task(db.Model):
         return TaskUser.run()
 
     def deleteComments(cls, task_id):
-        #Delete all comments relative to the Task
-        
+        #Delete all comments relative to the Task        
         taskComments = Comment.all()
-        taskComments.filter("task_id =", task_id)               
-              
+        taskComments.filter("task_id =", task_id)
         for comment in taskComments.run():
             comment.delete()
+
+    def addParticipant(cls, task_id, username):
+        key = db.Key.from_path('Task',int (task_id), parent = task_key())            
+        task = db.get(key)        
+        if username not in task.participants:
+            task.participants.append(username)
+            task.put()
+
+
+
 
 
 

@@ -102,6 +102,7 @@ class Main(HurbHandler):
         self.content = self.request.get('commentContent')        
         self.task_id = self.request.get('task_id')
         self.delete = self.request.get('deleteTask')
+        self.participate = self.request.get('participateTask')
 
 
         if self.comment and self.content and self.task_id:
@@ -120,15 +121,23 @@ class Main(HurbHandler):
                 creator = task.author;
                 if self.user.username == creator:
                     task.deleteComments(int(self.task_id))
-                    db.delete(key)
-                    self.redirect('/')
-                else:
-                    self.response.out.write("not the creator of the task")
-                    self.redirect('/')
+                    db.delete(key)                    
             else:
                 self.response.out.write("task is nonetype")
-                self.redirect('/')
+            self.redirect('/')
 
+
+        #participate to the task
+        if self.participate and self.task_id:
+            key = db.Key.from_path('Task',int (self.task_id), parent = task_key())            
+            task = db.get(key)
+
+            if task is not None:                                
+                task.addParticipant(int(self.task_id), self.user.username)
+            else:
+                self.response.out.write("task is nonetype")
+            self.redirect('/')
+            
 
         self.response.out.write("com: "+self.comment+"\n")   
         self.response.out.write("content :"+self.content+"\n")   
@@ -184,7 +193,7 @@ class NewTask(HurbHandler):
             self.render('newtask.html', **params)
         else:
             #self.write(self.taskDate)
-            task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = convertedDate)
+            task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = convertedDate, participants = [])
             task.put()
             self.redirect('/task/%s' % str(task.key().id())) 
 
