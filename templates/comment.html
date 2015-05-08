@@ -1,11 +1,26 @@
-<div class="jumbotron" style="padding:15px; margin:25px;border:1px;border-style:solid;width: 50%; height: 5%;">
-	<div class="comment_header">
 
-      <h2>{{comment.author}} : <br><small>  Published the {{comment.date}}</small></h2>
-  	    <h4>
-          <textarea style="resize:none;margin:10px;padding:10px;width: 100%; height: 100%;" readonly>{{comment.content | safe}}</textarea>
-        </h4>
+<div class="container" style="margin-top:50px">
+  <div class="row clearfix">
+    <div class="col-md-12 column">
+      <div class="row clearfix">
+        <div class="col-md-2 column">
+        	<h3>{{comment.date.strftime("%d/%m/%Y")}}</h3><br>        	
+          	<img class="img-circle" style="max-height: 100px; max-width: 100px;" alt="140x140" src="http://lorempixel.com/140/140/"> <span class="label label-default">{{comment.author}}</span>
+        </div>
+        <div class="col-md-6 column">
+           <!-- <span class="label label-default">Label</span> -->
+           <br>
+          <h3>
+          	{{comment.author}} has said :
+          </h3>          
+          <p>
+          	{{comment.content | safe}}
+          </p>
+        </div>
+        <div class="col-md-4 column">
+
+        </div>
+      </div>
     </div>
-
+  </div>
 </div>
-

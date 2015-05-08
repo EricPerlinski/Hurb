@@ -90,9 +90,8 @@ class Main(HurbHandler):
     def get(self):
         self.response.out.write("getMainPage")
         if self.user:   
-            tasks = Task.all()
-            comments = Comment.all()
-            self.render('home.html', tasks = tasks, comments = comments)            
+            tasks = Task.all()            
+            self.render('home.html', tasks = tasks)            
         else:
             self.render('home.html')
 

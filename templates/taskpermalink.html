@@ -2,8 +2,7 @@
 
 {% block tasks %}
   {{task.render() | safe}}
-
-  <p> Comments under : </p>
+  
   {% for c in comments %}
   	{% if c.gettaskid() == task.key().id() %}
   		{{c.render() | safe}}
