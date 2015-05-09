@@ -288,8 +288,6 @@ class TaskPage(HurbHandler):
                 self.response.out.write("Task doesn't exist anymore")
             else:
                 self.redirect(redirectTo)
-
-                #Leave a task:
         
         if self.cancel:
             #Is the user
@@ -397,7 +395,7 @@ class Profil(HurbHandler):
     def get(self):
         if self.user :
             UserTask=Task.GiveUserTask(self.user.username)
-            self.render('profil.html', user = self.user, profil = "profil",UserTask=UserTask)
+            self.render('profil.html', user = self.user, username = self.user.username, profil = "profil",UserTask=UserTask)
         else:
             self.redirect('/login')
 
