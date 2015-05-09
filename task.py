@@ -74,17 +74,6 @@ class Task(db.Model):
         u = Task.all().filter('title =', name).get()
         return u
 
-
-
-    @classmethod
-    def register(cls, ):
-        pw_hash = make_pw_hash(username, title, description, date,time)
-        return Task(parent = task_key(),
-                    title = title,
-                    description = description,
-                    date = date
-                    )
-
     def render(self, username):
         self._render_text = self.description.replace('\n', '<br>')
         return render_str("task.html", t = self, username = username)

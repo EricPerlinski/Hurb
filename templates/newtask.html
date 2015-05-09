@@ -209,10 +209,8 @@
 
     google.maps.event.addListener(map, 'click', function(event) {
       marker.setPosition(event.latLng);
-
       $(document.getElementById("latitude")).value = (event.latLng).lat();
       $(document.getElementById("longitude")).value = (event.latLng).lng();
-
       marker.setMap(map);
       marker.setAnimation(google.maps.Animation.DROP);
     });
