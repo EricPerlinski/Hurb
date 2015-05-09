@@ -228,7 +228,7 @@ class TaskPage(HurbHandler):
             self.error(404)
             return
 
-        self.render("taskpermalink.html", task=task,comments = comments)
+        self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
 
     def post(self, task_id):
         url_get = self.request.url
@@ -274,7 +274,7 @@ class TaskPage(HurbHandler):
 
         comments = Comment.all()
         comments.order('date')   
-        self.render("taskpermalink.html", task=task,comments = comments)
+        self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
         
 
 

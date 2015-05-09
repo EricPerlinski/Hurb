@@ -6,7 +6,9 @@
 
 
 {% block tasks %}
+	
 	{% for t in tasks %}
-		{{t.render() | safe}}		
+		{{t.render(username) | safe}}		
 	{% endfor %}
+	
 {% endblock %}

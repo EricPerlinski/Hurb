@@ -27,11 +27,13 @@
                 <em class="glyphicon glyphicon-align-center"></em> 
                 Add a comment
               </button>
-             
-             <button class="btn btn-default" type="button" id="deleteBtn{{t.key().id()}}" name="deleteBtn">
-                <em class="glyphicon glyphicon-align-justify"></em> 
-                Delete the task
-              </button>
+
+              {% if t.author == username %}
+               <button class="btn btn-default" type="button" id="deleteBtn{{t.key().id()}}" name="deleteBtn">
+                  <em class="glyphicon glyphicon-align-justify"></em> 
+                  Delete the task
+                </button>
+              {% endif %}
 
               <p id="participateStatus{{ t.key().id() }}"></p>
 
@@ -73,7 +75,7 @@
                 {% endif %}
               </div>
             <hr/>
-            
+
             {%if t.getNumberOfComments(t.key().id()) > 0 %}
               Number of comments : {{t.getNumberOfComments(t.key().id())}} <br/>
             {% endif %}
@@ -106,10 +108,18 @@
 
         if ( pattern.test(url) ){
           $(document.getElementById("permaLink")).hide();
-          $(document.getElementById("participantsDiv")).show();
-          
+          $(document.getElementById("participantsDiv")).show();          
         }
 
+        /*
+        var user = $(document.getElementById("myBroId")).value;
+        alert("Bro : "+ user);
+        if ($user == {{t.author}}){
+          alert("task {{t.key().id()}} has been published by {{t.author}}");
+        }else{
+          alert("nothing");
+        }
+        */
 
 
         $(document.getElementById("commentBtn{{ t.key().id() }}")).click(function(e) {

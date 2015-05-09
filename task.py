@@ -85,9 +85,9 @@ class Task(db.Model):
                     date = date
                     )
 
-    def render(self):
+    def render(self, username):
         self._render_text = self.description.replace('\n', '<br>')
-        return render_str("task.html", t = self)
+        return render_str("task.html", t = self, username = username)
 
     def getNumberOfComments(self,jinjaid):
         comments = Comment.all()
