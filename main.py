@@ -125,7 +125,8 @@ class Main(HurbHandler):
             tasks = Task.all()            
             self.render('home.html', tasks = tasks, username = self.user.username)            
         else:
-            self.render('home.html')
+            tasks = Task.all()
+            self.render('home.html',tasks = tasks)
 
     def post(self):
         self.response.out.write("postMainPage")
