@@ -12,8 +12,29 @@
     
 
 
+    <div class="container" style="margin-top:20px">
+      <div class="row clearfix">
+        <div class="col-md-12 column">
+          <div class="row clearfix">
+            <div class="col-md-3 column">
+              &nbsp;
+            </div>
+            <div class="col-md-6 column">
+              <h4>enter a New Task</h4>
+            </div>
 
-    <h2>enter a New Task</h2>
+            <div class="col-md-3 column">
+              &nbsp;
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
     <form method="post">
       
     <div class="container" style="margin-top:20px">
@@ -106,7 +127,7 @@
                   
                    
                       <label class="control-label" for="date"> When ? {{error_date}} {{convert_date}} </label>
-                      <div class="input-group date" id="dp3" data-date="2015-05-01T15:25:00Z">
+                      <div class="input-group date" id="dp3" data-date="2015-05-11T15:25:00Z">
                         <input class="form-control" name="date" type="text" readonly="" value="{{datetime}}"> 
                         <span class="input-group-addon"><i class="glyphicon glyphicon-remove"></i></span>
                         <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
@@ -208,14 +229,22 @@
 
 
 <p>{{valid_task}}</p>
- 
+
+
+
+
 <script type="text/javascript">
+ 
+    
     $("#dp3").datetimepicker({
         format: "dd/mm/yyyy HH:ii P",
         showMeridian: true,
         autoclose: true,
-        todayBtn: true
+        todayBtn: true,
+        startDate: "2015-05-10 00:00"
     });
+
+    
 </script>   
 
 

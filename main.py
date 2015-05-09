@@ -117,6 +117,11 @@ class HurbHandler(webapp2.RequestHandler):
         uid = self.read_secure_cookie('user_id')
         self.user = uid and Bro.by_id(int(uid))
 
+        if self.request.url.endswith('.json'):
+            self.format = 'json'
+        else:
+            self.format = 'html'
+
 
 class Main(HurbHandler):
     def get(self):
@@ -437,6 +442,13 @@ class Profil(HurbHandler):
         else:
             self.redirect('/login')
 
+class Contact(HurbHandler):
+    def get(self):
+        if self.user :
+            self.render('contact.html', user = self.user, username = self.user.username)
+        else:
+            self.render('contact.html')
+
 class Modify (Signup):
     def get (self):
         if self.user:
@@ -469,7 +481,8 @@ application = webapp2.WSGIApplication([('/',Main),
                                        ('/login',Login),
                                        ('/task/([0-9]+)(?:.json)?', TaskPage),
                                        ('/logout', Logout),
-                                       ('/user/([0-9a-zA-Z]+)', UserPage),
+                                       ('/contact', Contact),
+                                       ('/user/([0-9a-zA-Z]+)(?:.json)?', UserPage),
                                        ('/signup',SaveUser),
                                        ('/newtask', NewTask),
                                        ('/profil/modify', Modify)],
