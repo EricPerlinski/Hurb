@@ -85,9 +85,11 @@
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
     <script>
 function initialize() {
-  var myLatlng = new google.maps.LatLng($('#location_lat').val(),$('#location_lng'));
+  var location_lat = Number($('#location_lat').val());
+  var location_lng = Number($('#location_lng').val());
+  var myLatlng = new google.maps.LatLng(location_lat,location_lng);
   var mapOptions = {
-    zoom: 10,
+    zoom: 14,
     center: myLatlng,
     mapTypeId: google.maps.MapTypeId.ROADMAP
   }
