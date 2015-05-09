@@ -3,7 +3,37 @@
 {% block tasks %}
   
   
-  {{task.render(username) | safe}} 
+  {{task.render(username) | safe}}
+
+      <div class="container" style="margin-top:20px">
+      <div class="row clearfix">
+        <div class="col-md-12 column">
+          <div class="row clearfix">
+            <div class="col-md-2 column">
+              <label for="location"> Location </label>
+                <form>
+                {{task.location_lat}}
+                <input id="location_lat" type="hidden" name="location_lat" value="{{task.location_lat}}"/> 
+                {{task.location_lng}}
+                <input id="location_lng" type="hidden" name="location_lng" value="{{task.location_lng}}"/>
+                </form>
+            </div>
+            <div class="col-md-8 column">    
+              
+                <div id="map" style="width: 500px; height: 500px; position: relative;">
+                     <div id="map-canvas"></div>
+                </div>
+            </div>
+             
+
+            <div class="col-md-2 column">
+              &nbsp;
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
 
   <br/>
 
@@ -50,6 +80,27 @@
 		  	{% endif %}
 		  {% endfor %} 
 	{% endif %}
+
+
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
+<script>
+ function initialize() {
+  var myLatlng = new google.maps.LatLng(document.getElementById('location_lat').value,document.getElementById('location_lng').value);
+  var mapOptions = {
+    zoom: 14,
+    center: myLatlng
+  }
+  var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+  var marker = new google.maps.Marker({
+      position: myLatlng,
+      map: map,
+      title: "It's here !"
+  });
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+</script>
 
 
 {% endblock %}

@@ -195,13 +195,17 @@ class NewTask(HurbHandler):
         self.taskTitle = self.request.get('title')
         self.taskDescription = self.request.get('description')
         self.taskDate = self.request.get('date')
-        self.lat = self.request.get('location_lat')
-        self.long = self.request.get('location_long')
+        self.location_lat = float(self.request.get('location_lat'))
+        self.location_lng = float(self.request.get('location_lng'))
+        self.reward = self.request.get('reward')
 
         params = dict(title = self.taskTitle,
                       description = self.taskDescription,
                       date = self.taskDate,
-                      author = self.author)
+                      author = self.author,
+                      location_lat = self.location_lat,
+                      location_lng = self.location_lng,
+                      reward = self.reward)
 
 
         if not self.taskTitle:
@@ -224,19 +228,18 @@ class NewTask(HurbHandler):
             if have_error :
                 params['error_date'] = "Choosen Date is not valid"
         
-        if self.lat and self.lng:
-            self.response.out.write(self.latLng)
-        else:
-            self.response.out.write("Latlng non catch")
+        if not self.location_lat or not self.location_lng:
+            params['error_map'] = "You didn't choose any location ! : current lat : "+self.location_lat + " - current lng : "+self.location_lng
+            have_error = True
 
         #Add the new task if it doesn't have any error
         if have_error:
             self.render('newtask.html', **params)
         else:
             
-            task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = convertedDate, participants = [])
+            task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = convertedDate, location_lat = self.location_lat, location_lng = self.location_lng, reward = self.reward, participants = [])
             task.put()
-            #self.redirect('/task/%s' % str(task.key().id())) 
+            self.redirect('/task/%s' % str(task.key().id())) 
 
 
 class TaskPage(HurbHandler):

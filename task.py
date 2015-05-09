@@ -64,6 +64,9 @@ class Task(db.Model):
     description = db.StringProperty(required = True, multiline = True)    
     date = db.DateTimeProperty(required = True) #Both date and time will be in this field    
     participants = db.StringListProperty()		#Save the username of all users who wants to participate
+    location_lat = db.FloatProperty(required = True)
+    location_lng = db.FloatProperty(required = True)
+    reward = db.StringProperty()
 
     @classmethod
     def by_id(cls, uid):
@@ -73,17 +76,6 @@ class Task(db.Model):
     def by_name(cls, name):
         u = Task.all().filter('title =', name).get()
         return u
-
-
-
-    @classmethod
-    def register(cls, ):
-        pw_hash = make_pw_hash(username, title, description, date,time)
-        return Task(parent = task_key(),
-                    title = title,
-                    description = description,
-                    date = date
-                    )
 
     def render(self, username):
         self._render_text = self.description.replace('\n', '<br>')
@@ -111,7 +103,11 @@ class Task(db.Model):
         d = {'title': self.title,
              'description': self.description,
              'date': self.date.strftime(time_fmt),
-             'author' : self.author
+             'author' : self.author,
+             'location_lat' : self.location_lat,
+             'location_lng' : self.location_lng,
+             'participants' : self.participants,
+             'reward' : self.reward
             }
         return d
 

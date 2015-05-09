@@ -79,7 +79,11 @@
           <p>
             The {{t.date.strftime("%d-%m-%Y %H:%M")}} <br>
             <hr/>
-
+            {% if t.reward %}
+              Reward : {{t.reward}}<br/>
+            {% else %}
+              No reward<br/>
+            {% endif %}
             Participants : {{ t.getNumberOfParticipants(t.key().id()) }} <br>            
               <div id="participantsDiv" style="margin-left:25%">
                 {% if t.getParticipant(t.key().id()) is not none %}

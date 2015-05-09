@@ -7,8 +7,33 @@
 
 {% block tasks %}
 	
-	{% for t in tasks %}
-		{{t.render(username) | safe}}		
-	{% endfor %}
+
+	{% if tasks %}
+
+	<div class="container" style="margin-top:20px">
+      <div class="row clearfix">
+        <div class="col-md-12 column">
+          <div class="row clearfix">
+            <div class="col-md-2 column">
+              &nbsp;
+            </div>
+            <div class="col-md-8 column"> 
+            	<h2> There's currently no tasks </h2>
+            </div>
+            <div class="col-md-2 column">
+              &nbsp;
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+	{% else %}
+		{% for t in tasks %}
+			{{t.render(username) | safe}}		
+		{% endfor %}
+	{% endif %}
 	
 {% endblock %}
