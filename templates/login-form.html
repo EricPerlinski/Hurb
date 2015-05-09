@@ -1,44 +1,18 @@
-<!DOCTYPE html>
+{% extends "header.html" %}
 
-<html>
-  <head>
-    <title>Login</title>
-    <style type="text/css">
-      .label {text-align: right}
-      .error {color: red}
-    </style>
-
-  </head>
-
-  <body>
+{% block content %}
     <h2>Login</h2>
+
     <form method="post">
-      <table>
-        <tr>
-          <td class="label">
-            Username
-          </td>
-          <td>
-            <input type="text" name="username" value="{{username}}">
-          </td>
-        </tr>
+    
+    <div class = "form-group">
+      <label for ="username"> Username </label>
+       <input type="text" name="username" value="{{username}}">
+    </div>
 
-        <tr>
-          <td class="label">
-            Password
-          </td>
-          <td>
-            <input type="password" name="password" value="">
-          </td>
-        </tr>
-      </table>
+    <div class = "form-group">
+      <label for ="username"> Username </label>
+      <input type="password" name="password" value="">
+    </div>
 
-      <div class="error">
-        {{error}}
-      </div>
-
-      <input type="submit">
-    </form>
-  </body>
-
-</html>
+{% endblock %}
