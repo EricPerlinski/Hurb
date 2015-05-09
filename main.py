@@ -120,7 +120,7 @@ class HurbHandler(webapp2.RequestHandler):
 
 class Main(HurbHandler):
     def get(self):
-        self.response.out.write("getMainPage")
+        
         if self.user:   
             tasks = Task.all()            
             self.render('home.html', tasks = tasks, username = self.user.username)            
@@ -129,7 +129,7 @@ class Main(HurbHandler):
             self.render('home.html',tasks = tasks)
 
     def post(self):
-        self.response.out.write("postMainPage")
+        
         self.comment = self.request.get('commentSend')
         self.content = self.request.get('commentContent')     
         self.task_id = self.request.get('task_id')
