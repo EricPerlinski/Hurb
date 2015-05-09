@@ -11,7 +11,7 @@ from string import letters
 
 
 
-secret = 'Dunno'
+secret = 'ThisIsReallyABigSecret'
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 PASS_RE = re.compile(r"^.{3,20}$")
 EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
@@ -20,6 +20,7 @@ ADDRESS_RE = re.compile(r"[a-zA-Z0-9\.\-\,]+")
 
 def make_secure_val(val):
     return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
+
 
 def check_secure_val(secure_val):
     val = secure_val.split('|')[0]

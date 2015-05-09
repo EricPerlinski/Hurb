@@ -234,7 +234,6 @@
 
     google.maps.event.addListener(map, 'click', function(event) {
       marker.setPosition(event.latLng);
-
       $(document.getElementById("location_lat")).val( (event.latLng).lat() );
       $(document.getElementById("location_lng")).val( (event.latLng).lng() );
 
