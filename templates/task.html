@@ -63,8 +63,8 @@
           <p>
             The {{t.date.strftime("%d-%m-%Y %H:%M")}} <br>
             Participants : {{ t.getNumberOfParticipants(t.key().id()) }} <br>
-            {%if t.get_number_of_comment(t.key().id()) > 0 %}
-              Number of comments : {{t.get_number_of_comment(t.key().id())}} <br/>
+            {%if t.getNumberOfComments(t.key().id()) > 0 %}
+              Number of comments : {{t.getNumberOfComments(t.key().id())}} <br/>
             {% endif %}
           </p>
 

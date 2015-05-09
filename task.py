@@ -32,7 +32,8 @@ class Comment(db.Model):
     @classmethod
     def by_taskid(cls, taskid):
         u = Comment.all().filter('task_id =', taskid).get()
-        return u    
+        return u   
+
 
     def gettaskid(self):
         return self.task_id
@@ -88,7 +89,7 @@ class Task(db.Model):
         self._render_text = self.description.replace('\n', '<br>')
         return render_str("task.html", t = self)
 
-    def get_number_of_comment(self,jinjaid):
+    def getNumberOfComments(self,jinjaid):
         comments = Comment.all()
         count = 0
         for i in comments:
@@ -123,6 +124,11 @@ class Task(db.Model):
         taskComments.filter("task_id =", task_id)
         for comment in taskComments.run():
             comment.delete()
+
+    def getParticipant(cls,task_id):
+        key = db.Key.from_path('Task', int(task_id), parent = task_key())
+        task = db.get(key)
+        return task.participants
 
     def addParticipant(cls, task_id, username):
         key = db.Key.from_path('Task',int (task_id), parent = task_key())            

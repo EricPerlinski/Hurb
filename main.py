@@ -91,7 +91,7 @@ class Main(HurbHandler):
         self.response.out.write("getMainPage")
         if self.user:   
             tasks = Task.all()            
-            self.render('home.html', tasks = tasks)            
+            self.render('home.html', tasks = tasks, username = self.user.username)            
         else:
             self.render('home.html')
 
@@ -202,6 +202,10 @@ class TaskPage(HurbHandler):
         key = db.Key.from_path('Task',int (task_id), parent = task_key())
         task = db.get(key)
         comments = Comment.all()
+        comments.order('date')
+
+
+
 
         if not task:
             self.error(404)
@@ -211,6 +215,24 @@ class TaskPage(HurbHandler):
 
     def post(self, task_id):
         self.comment = self.request.get('comment')
+
+        self.response.out.write("postTaskPage")
+        self.comment = self.request.get('commentSend')
+        self.content = self.request.get('commentContent')        
+        self.task_id = self.request.get('task_id')
+        self.delete = self.request.get('deleteTask')
+        self.participate = self.request.get('participateTask')
+
+
+        if self.comment and self.content and self.task_id:
+            com = Comment(task_id = int(self.task_id), author = self.user.username, content = self.content, date = datetime.datetime.now())
+            com.put()        
+            self.response.out.write("Comm enregistre")
+        else:
+            self.response.out.write("Comm saute\n")
+        self.response.out.write("com: "+self.comment+"\n")   
+        self.response.out.write("content :"+self.content+"\n")   
+        self.response.out.write("task :"+self.task_id)   
         
 
         key = db.Key.from_path('Task',int (task_id), parent = task_key())
@@ -224,15 +246,14 @@ class TaskPage(HurbHandler):
             com = Comment(task_id = int(task_id), author = self.user.username, content = "Just a comment test", date = datetime.datetime.now())
             com.put()
             comments = Comment.all()
+            comments.order('date')
             self.render("taskpermalink.html", task = task, comment=com , comments = comments)
         
-
+        
 
         #Participate to the task
         
 
-        else:
-            self.render("header.html", task = task)   
 
 class Signup(HurbHandler):
     def get(self):
@@ -354,7 +375,6 @@ class Delete (HurbHandler):
         Bro.Deleted(self.user.username)
         self.user=None
         self.redirect('/')
-
 
 application = webapp2.WSGIApplication([('/',Main),
 									   ('/profil',Profil),
