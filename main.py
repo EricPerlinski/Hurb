@@ -195,7 +195,8 @@ class NewTask(HurbHandler):
         self.taskTitle = self.request.get('title')
         self.taskDescription = self.request.get('description')
         self.taskDate = self.request.get('date')
-
+        self.lat = self.request.get('location_lat')
+        self.long = self.request.get('location_long')
 
         params = dict(title = self.taskTitle,
                       description = self.taskDescription,
@@ -209,7 +210,7 @@ class NewTask(HurbHandler):
 
         if not self.taskDescription:
             params['error_description'] = "Please enter a description"
-            have_error = True            
+            have_error = True 
 
         #Check the date, cannot be a previous date
         if not self.taskDate:
@@ -223,15 +224,19 @@ class NewTask(HurbHandler):
             if have_error :
                 params['error_date'] = "Choosen Date is not valid"
         
+        if self.lat and self.lng:
+            self.response.out.write(self.latLng)
+        else:
+            self.response.out.write("Latlng non catch")
 
         #Add the new task if it doesn't have any error
         if have_error:
             self.render('newtask.html', **params)
         else:
-            #self.write(self.taskDate)
+            
             task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = convertedDate, participants = [])
             task.put()
-            self.redirect('/task/%s' % str(task.key().id())) 
+            #self.redirect('/task/%s' % str(task.key().id())) 
 
 
 class TaskPage(HurbHandler):
