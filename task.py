@@ -135,6 +135,13 @@ class Task(db.Model):
         else:
             return None
 
+    def getParticipate(self,username):
+        for t in self.participants:
+            if t == username:
+                return True
+        return False
+
+
     def addParticipant(cls, task_id, username):
         key = db.Key.from_path('Task',int (task_id), parent = task_key())            
         task = db.get(key)        

@@ -394,10 +394,22 @@ class SaveUser(Signup):
 class UserPage(HurbHandler):
     def get(self,username):
         if self.user.username == username:
-            self.response.out.write("Mon profil")
+            self.redirect("/profil")
         else:
-            self.response.out.write("url : "+username+"  ")
-        
+            
+            dateminusoneweek = datetime.datetime.now() - datetime.timedelta(days=7) 
+            task = db.GqlQuery("Select * from Task")
+            tasks = []
+            for t in task: 
+                if t.getParticipate(username):
+                    tasks.append(t.title)
+            
+            self.response.out.write("Upcomming task : <br/>")
+            for i in tasks:
+                self.response.out.write( i + "<br/>")
+            
+                
+
         #self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
 
     
