@@ -91,15 +91,11 @@
                     <a href="/user/{{u}}">{{u}}</a><br/>                  
                   {% endfor %}
                 {% endif %}
-              </div>
+              </div>           
+
+            Number of comments : {{t.getNumberOfComments(t.key().id())}} <br/>
             <hr/>
-
-            {%if t.getNumberOfComments(t.key().id()) > 0 %}
-              Number of comments : {{t.getNumberOfComments(t.key().id())}} <br/>
-            {% endif %}
-          </p>
-
-          <p>       
+   
             <a id="permaLink"class="btn" href="/task/{{t.key().id()}}">View Task »</a>
           </p>
 

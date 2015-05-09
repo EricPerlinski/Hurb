@@ -146,7 +146,7 @@ class Main(HurbHandler):
 
         #Delete the task with its comments
         if self.delete :
-            (status,msg) = deleteTask(self.task_id, self.user.username)
+            status,msg = deleteTask(self.task_id, self.user.username)
             if not status:                
                 self.response.out.write("%s" % msg)
             else:
@@ -294,7 +294,7 @@ class TaskPage(HurbHandler):
             key_comment = db.Key.from_path('Comment', int(self.comment_id))
             commentToDel = db.get(key_comment)
             commentToDel.delete()
-
+            self.redirect(redirectTo)
 
 
         #participate to the task
