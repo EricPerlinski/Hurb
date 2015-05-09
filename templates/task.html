@@ -70,7 +70,7 @@
               <div id="participantsDiv" style="margin-left:25%">
                 {% if t.getParticipant(t.key().id()) is not none %}
                   {%for u in t.getParticipant(t.key().id())  %}
-                    {{u}}                  
+                    <a href="/user/{{u}}">{{u}}</a><br/>                  
                   {% endfor %}
                 {% endif %}
               </div>

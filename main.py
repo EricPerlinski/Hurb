@@ -365,6 +365,16 @@ class SaveUser(Signup):
             self.login(u)
             self.redirect('/profil')
 
+class UserPage(HurbHandler):
+    def get(self,username):
+        if self.user.username == username:
+            self.response.out.write("Mon profil")
+        else:
+            self.response.out.write("url : "+username+"  ")
+        
+        #self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
+
+    
 class Profil(HurbHandler):
     def get(self):
         if self.user :
@@ -405,6 +415,7 @@ application = webapp2.WSGIApplication([('/',Main),
                                        ('/login',Login),
                                        ('/task/([0-9]+)(?:.json)?', TaskPage),
                                        ('/logout', Logout),
+                                       ('/user/([0-9a-zA-Z]+)', UserPage),
                                        ('/signup',SaveUser),
                                        ('/newtask', NewTask),
                                        ('/profil/modify', Modify)],
