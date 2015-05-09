@@ -12,16 +12,16 @@
             <div class="col-md-2 column">
               <label for="location"> Location </label>
                 <form>
-                {{task.location_lat}}
+                latitude : {{task.location_lat}}
                 <input id="location_lat" type="hidden" name="location_lat" value="{{task.location_lat}}"/> 
-                {{task.location_lng}}
+                longitude : {{task.location_lng}}
                 <input id="location_lng" type="hidden" name="location_lng" value="{{task.location_lng}}"/>
                 </form>
             </div>
             <div class="col-md-8 column">    
               
-                <div id="map" style="width: 500px; height: 500px; position: relative;">
-                     <div id="map-canvas" style="width:500px;height:500px;"></div>
+                <div id="map" style="width: 300px; height: 300px; position: relative;">
+                     <div id="map-canvas" style="width:300px;height:300px;"></div>
                 </div>
             </div>
              
