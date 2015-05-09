@@ -137,6 +137,7 @@ class Main(HurbHandler):
         self.task_id = self.request.get('task_id')
         self.delete = self.request.get('deleteTask')
         self.participate = self.request.get('participateTask')
+        self.cancel = self.request.get('cancelParticipation')
 
         #comment the Task
         if self.comment :
@@ -161,6 +162,21 @@ class Main(HurbHandler):
                 self.response.out.write("Task doesn't exist anymore")
             else:
                 self.redirect('/')
+
+        #Leave a task:
+        if self.cancel:
+            key = db.Key.from_path('Task',int (self.task_id), parent = task_key())
+            self.task = db.get(key)
+            if not self.task:
+                self.error(404)
+                return
+            #Is the user
+            participants = self.task.getParticipant(self.task_id)
+            #task.getNumberOfParticipants(self.task_id) > 0 
+            if participants is not None and self.user.username in participants:                
+                self.task.participants.remove(self.user.username)
+                self.task.put()
+            self.redirect('/')
 
 
         tasks = Task.all()
@@ -241,10 +257,11 @@ class TaskPage(HurbHandler):
         self.task_id = self.request.get('task_id')
         self.delete = self.request.get('deleteTask')
         self.participate = self.request.get('participateTask')
+        self.cancel = self.request.get('cancelParticipation')
 
-        key = db.Key.from_path('Task',int (task_id), parent = task_key())
-        task = db.get(key)
-        if not task:
+        key = db.Key.from_path('Task',int (self.task_id), parent = task_key())
+        self.task = db.get(key)
+        if not self.task:
             self.error(404)
             return
 
@@ -272,9 +289,20 @@ class TaskPage(HurbHandler):
             else:
                 self.redirect(redirectTo)
 
+                #Leave a task:
+        
+        if self.cancel:
+            #Is the user
+            participants = self.task.getParticipant(self.task_id)
+            #task.getNumberOfParticipants(self.task_id) > 0 
+            if participants is not None and self.user.username in participants:                
+                self.task.participants.remove(self.user.username)
+                self.task.put()
+            self.redirect(redirectTo)
+
         comments = Comment.all()
         comments.order('date')   
-        self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
+        self.render("taskpermalink.html", task=self.task, username = self.user.username, comments = comments)
         
 
 
