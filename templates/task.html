@@ -62,7 +62,18 @@
           </h3>
           <p>
             The {{t.date.strftime("%d-%m-%Y %H:%M")}} <br>
-            Participants : {{ t.getNumberOfParticipants(t.key().id()) }} <br>
+            <hr/>
+
+            Participants : {{ t.getNumberOfParticipants(t.key().id()) }} <br>            
+              <div id="participantsDiv" style="margin-left:25%">
+                {% if t.getParticipant(t.key().id()) is not none %}
+                  {%for u in t.getParticipant(t.key().id())  %}
+                    {{u}}                  
+                  {% endfor %}
+                {% endif %}
+              </div>
+            <hr/>
+            
             {%if t.getNumberOfComments(t.key().id()) > 0 %}
               Number of comments : {{t.getNumberOfComments(t.key().id())}} <br/>
             {% endif %}
@@ -84,17 +95,22 @@
 
 <script type="text/javascript">
     $(document).ready(function(e){
-        var url = document.URL;
-        var pattern = /task/i
-
-
-        if ( pattern.test(url) ){
-          $(document.getElementById("permaLink")).hide();
-        }
 
         $(".commentForm").hide();
         $(".deleteForm").hide();
         $(".participateForm").hide();
+        $(document.getElementById("participantsDiv")).hide();
+
+        var url = document.URL;
+        var pattern = /task/i
+
+        if ( pattern.test(url) ){
+          $(document.getElementById("permaLink")).hide();
+          $(document.getElementById("participantsDiv")).show();
+          
+        }
+
+
 
         $(document.getElementById("commentBtn{{ t.key().id() }}")).click(function(e) {
             $(".deleteForm").hide();

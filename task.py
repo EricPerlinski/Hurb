@@ -101,8 +101,10 @@ class Task(db.Model):
     def getNumberOfParticipants(self, jinjaid):
         key = db.Key.from_path('Task',int (jinjaid), parent = task_key())            
         task = db.get(key)
-        return len(task.participants)
-
+        if task != None:
+            return len(task.participants)
+        else:
+            return 0
     
     def as_dict(self):
         time_fmt = '%d-%m-%Y %H:%M'
@@ -128,7 +130,10 @@ class Task(db.Model):
     def getParticipant(cls,task_id):
         key = db.Key.from_path('Task', int(task_id), parent = task_key())
         task = db.get(key)
-        return task.participants
+        if task != None :
+            return task.participants
+        else:
+            return None
 
     def addParticipant(cls, task_id, username):
         key = db.Key.from_path('Task',int (task_id), parent = task_key())            

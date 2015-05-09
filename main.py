@@ -47,8 +47,43 @@ def changeToDate(taskDate):
                             day=int(dateString[0]),
                             hour=hour,
                             minute=int(time[1]))
-
     return date
+
+
+def commentTask(task_id, author, content):
+    if task_id and content :
+        com = Comment(task_id = int(task_id), author = author, content = content, date = datetime.datetime.now())
+        com.put()        
+        return True
+    else:
+        return False
+
+def deleteTask(task_id, username):
+    if task_id and username:
+        key = db.Key.from_path('Task',int (task_id), parent = task_key())            
+        task = db.get(key)
+        #Get the username of the creator 
+        if task is not None:                
+            creator = task.author;
+            if username == creator:
+                task.deleteComments(int(task_id))
+                task.delete()
+                return (True, "Task has been correctly deleted")
+            else:
+                return (False, "You cannot delete tasks from other Bros modafucka !!!")
+    else:
+        return (False, "Task has not been deleted : data are missing")
+
+def participateToTask(task_id, username):
+    key = db.Key.from_path('Task',int (task_id), parent = task_key())            
+    task = db.get(key)
+    #If the task exists, add the user as a participant
+    if task is not None:                                
+        task.addParticipant(int(task_id), username)
+        return True
+    else:
+        return False
+
 
 
 
@@ -98,53 +133,39 @@ class Main(HurbHandler):
     def post(self):
         self.response.out.write("postMainPage")
         self.comment = self.request.get('commentSend')
-        self.content = self.request.get('commentContent')        
+        self.content = self.request.get('commentContent')     
         self.task_id = self.request.get('task_id')
         self.delete = self.request.get('deleteTask')
         self.participate = self.request.get('participateTask')
 
-
-        if self.comment and self.content and self.task_id:
-            com = Comment(task_id = int(self.task_id), author = self.user.username, content = self.content, date = datetime.datetime.now())
-            com.put()        
-            self.response.out.write("Comm enregistre")
-        else:
-            self.response.out.write("Comm saute\n")
+        #comment the Task
+        if self.comment :
+            if not commentTask(self.task_id, self.user.username, self.content):                
+                self.response.out.write("Comment has not been saved")
+            else:
+                self.redirect('/')
 
         #Delete the task with its comments
-        if self.delete and self.task_id:
-            key = db.Key.from_path('Task',int (self.task_id), parent = task_key())            
-            task = db.get(key)
-            #Get the username of the creator 
-            if task is not None:                
-                creator = task.author;
-                if self.user.username == creator:
-                    task.deleteComments(int(self.task_id))
-                    db.delete(key)                    
+        if self.delete :
+            (status,msg) = deleteTask(self.task_id, self.user.username)
+            if not status:                
+                self.response.out.write("%s" % msg)
             else:
-                self.response.out.write("task is nonetype")
-            self.redirect('/')
-
+                self.response.out.write("%s" % msg)
+                self.redirect('/')
 
         #participate to the task
-        if self.participate and self.task_id:
-            key = db.Key.from_path('Task',int (self.task_id), parent = task_key())            
-            task = db.get(key)
-
-            if task is not None:                                
-                task.addParticipant(int(self.task_id), self.user.username)
+        if self.participate :
+            #self.response.out.write("You really want to participate !!!")
+            if not participateToTask(self.task_id, self.user.username):                
+                self.response.out.write("Task doesn't exist anymore")
             else:
-                self.response.out.write("task is nonetype")
-            self.redirect('/')
-            
+                self.redirect('/')
 
-        self.response.out.write("com: "+self.comment+"\n")   
-        self.response.out.write("content :"+self.content+"\n")   
-        self.response.out.write("task :"+self.task_id)   
 
         tasks = Task.all()
         comments = Comment.all()
-        self.render('home.html', tasks = tasks, comments = comments) 
+        self.render('home.html', tasks = tasks, comments = comments)
 
 
 
@@ -202,11 +223,7 @@ class TaskPage(HurbHandler):
         key = db.Key.from_path('Task',int (task_id), parent = task_key())
         task = db.get(key)
         comments = Comment.all()
-        comments.order('date')
-
-
-
-
+        comments.order('date')        
         if not task:
             self.error(404)
             return
@@ -214,26 +231,16 @@ class TaskPage(HurbHandler):
         self.render("taskpermalink.html", task=task,comments = comments)
 
     def post(self, task_id):
-        self.comment = self.request.get('comment')
+        url_get = self.request.url
+        id_permalink = url_get.split('/')[4]
+        #self.response.out.write("url : "+id_permalink+"  ")
+        redirectTo = "/task/"+id_permalink
 
-        self.response.out.write("postTaskPage")
         self.comment = self.request.get('commentSend')
         self.content = self.request.get('commentContent')        
         self.task_id = self.request.get('task_id')
         self.delete = self.request.get('deleteTask')
         self.participate = self.request.get('participateTask')
-
-
-        if self.comment and self.content and self.task_id:
-            com = Comment(task_id = int(self.task_id), author = self.user.username, content = self.content, date = datetime.datetime.now())
-            com.put()        
-            self.response.out.write("Comm enregistre")
-        else:
-            self.response.out.write("Comm saute\n")
-        self.response.out.write("com: "+self.comment+"\n")   
-        self.response.out.write("content :"+self.content+"\n")   
-        self.response.out.write("task :"+self.task_id)   
-        
 
         key = db.Key.from_path('Task',int (task_id), parent = task_key())
         task = db.get(key)
@@ -241,17 +248,33 @@ class TaskPage(HurbHandler):
             self.error(404)
             return
 
-        #Leave a comment :
-        if self.comment:
-            com = Comment(task_id = int(task_id), author = self.user.username, content = "Just a comment test", date = datetime.datetime.now())
-            com.put()
-            comments = Comment.all()
-            comments.order('date')
-            self.render("taskpermalink.html", task = task, comment=com , comments = comments)
-        
-        
+        #comment the Task
+        if self.comment :
+            if not commentTask(self.task_id, self.user.username, self.content):                
+                self.response.out.write("Comment has not been saved")
+            else:
+                self.redirect(redirectTo)
 
-        #Participate to the task
+        #Delete the task with its comments
+        if self.delete :
+            (status,msg) = deleteTask(self.task_id, self.user.username)
+            if not status:                
+                self.response.out.write("%s" % msg)
+            else:
+                self.response.out.write("%s" % msg)
+                self.redirect(redirectTo)
+
+        #participate to the task
+        if self.participate :
+            #self.response.out.write("You really want to participate !!!")
+            if not participateToTask(self.task_id, self.user.username):                
+                self.response.out.write("Task doesn't exist anymore")
+            else:
+                self.redirect(redirectTo)
+
+        comments = Comment.all()
+        comments.order('date')   
+        self.render("taskpermalink.html", task=task,comments = comments)
         
 
 

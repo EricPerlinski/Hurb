@@ -3,48 +3,19 @@
 {% block tasks %}
   
   
-  {{task.render() | safe}}
-  
-  	{% if task.getParticipant(task.key().id()) %}
-	  	<br/>
-	  	<br/>
-	  	<hr/>
-	  	<div class="container" style="margin-top:50px">
-			<div class="row clearfix">
-			    <div class="col-md-12 column">
-			      <div class="row clearfix">
-			        <span class="label label-primary">Participants :</span>
-			      </div>
-			    </div>
-		  	</div>
-		</div>
+  {{task.render() | safe}} 
 
-		{%for u in task.getParticipant(task.key().id()) %}
-			<div class="container" style="margin-top:20px">
-			  <div class="row clearfix">
-			    <div class="col-md-12 column">
-			      <div class="row clearfix">
-			        {{u}}
-			      </div>
-			    </div>
-			  </div>
-			</div>
-		  
-		  	
-		{% endfor %}
-	{% endif %}
-  <hr/>
-  <br/>
   <br/>
 
 
   	{% if task.getNumberOfComments(task.key().id()) > 0 %}
 
 	  	<div class="container" style="margin-top:50px">
+	  		<h3>Comments :</h3>
 		  <div class="row clearfix">
 		    <div class="col-md-12 column">
 		      <div class="row clearfix">
-		        <span class="label label-default">Comments :</span>
+		        
 		      </div>
 		    </div>
 		  </div>
