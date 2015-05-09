@@ -29,7 +29,6 @@ from task import *
 def validDate(taskDate):
     return (datetime.datetime.now() < taskDate)
 
-
 def changeToDate(taskDate):    
     #Convert the given date (dd/mm/yyyy HH:ii P) to a dateTime object          
     dateAndtime = taskDate.split(' ', 1)
@@ -83,8 +82,6 @@ def participateToTask(task_id, username):
         return True
     else:
         return False
-
-
 
 
 class HurbHandler(webapp2.RequestHandler):
@@ -207,7 +204,6 @@ class NewTask(HurbHandler):
                       location_lng = self.location_lng,
                       reward = self.reward)
 
-
         if not self.taskTitle:
             params['error_title'] = "Please enter a Title"
             have_error = True
@@ -232,12 +228,14 @@ class NewTask(HurbHandler):
             params['error_map'] = "You didn't choose any location ! : current lat : "+self.location_lat + " - current lng : "+self.location_lng
             have_error = True
 
+
         #Add the new task if it doesn't have any error
         if have_error:
             self.render('newtask.html', **params)
         else:
             
             task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = convertedDate, location_lat = self.location_lat, location_lng = self.location_lng, reward = self.reward, participants = [])
+
             task.put()
             self.redirect('/task/%s' % str(task.key().id())) 
 
@@ -266,6 +264,8 @@ class TaskPage(HurbHandler):
         self.delete = self.request.get('deleteTask')
         self.participate = self.request.get('participateTask')
         self.cancel = self.request.get('cancelParticipation')
+        self.deleteComment = self.request.get('deleteCom')
+        self.comment_id = self.request.get('comment_id')
 
         key = db.Key.from_path('Task',int (self.task_id), parent = task_key())
         self.task = db.get(key)
@@ -288,6 +288,13 @@ class TaskPage(HurbHandler):
             else:
                 self.response.out.write("%s" % msg)
                 self.redirect(redirectTo)
+
+        if self.deleteComment:
+            key_comment = db.Key.from_path('Comment', int(self.comment_id))
+            commentToDel = db.get(key_comment)
+            commentToDel.delete()
+
+
 
         #participate to the task
         if self.participate :

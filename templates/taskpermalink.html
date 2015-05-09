@@ -65,9 +65,16 @@
 		        		</div>
 		        		<div class="col-md-4 column">
 		        			{% if user.username == c.author or user.username == task.author %}
-		        				<a class="btn btn-default" onclick=""> Delete Comment </a>
-		        			{% endif %}
-		        			
+
+		        				<button class="btn btn-default" type="button" id="deleteComBtn{{c.key().id()}}" name="deleteComBtn">Delete Comment </button>
+		        				<form id="deleteComForm{{c.key().id()}}" class="deleteComForm" name="deleteComForm" method="POST" >
+		        					<input type='hidden' value="{{ task.key().id() }}" name="task_id"/>
+					                <input type='hidden' value="{{ c.key().id() }}" name="comment_id"/>
+					                <label> Click the button below if you want to delete it </label> <br>  
+					                <button type="submit" class="btn btn-default" value="submit" name="deleteCom">Delete it !</button>                
+				              	</form>
+
+		        			{% endif %}		        			
 		        		</div>
 				      </div>
 				      <div class="row clearfix">
@@ -78,7 +85,24 @@
 				</div>
 
 		  	{% endif %}
-		  {% endfor %} 
+		  	<script type="text/javascript">
+		  	$(document).ready(function(e){
+		  		$(document.getElementById("deleteComForm{{ c.key().id() }}")).hide();
+		  		$(document.getElementById("deleteComBtn{{ c.key().id() }}")).click(function(e) {
+		            if ($(document.getElementById("deleteComForm{{ c.key().id() }}")).is(':hidden')){
+		              $(document.getElementById("deleteComForm{{ c.key().id() }}")).show();          
+		            }else{
+		              $(document.getElementById("deleteComForm{{ c.key().id() }}")).hide();
+		            }
+		            e.preventDefault();
+		        });
+		  	});
+		  	</script>
+
+		  {% endfor %}
+
+		  
+
 	{% endif %}
 
 
