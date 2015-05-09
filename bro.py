@@ -3,6 +3,7 @@
 ##########################################################################################
 from google.appengine.ext import db
 from security import make_pw_hash
+from security import valid_pw
 
 
 def bro_key(name = 'default'):
