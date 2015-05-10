@@ -5,6 +5,7 @@
 import os
 import random
 import datetime
+from google.appengine.api import memcache
 
 ##########################################################################################
 ####		WEB RELATIVES IMPORT AND CONFIGURATIONS
@@ -53,86 +54,44 @@ def changeToDate(taskDate):
 ####        CACHE SYSTEM 
 ##########################################################################################
 
-CACHE = {}
+
 def getAllTasks(update = False):
-    key = 'allTasks'
-    if not update and key in CACHE:
-        tasks = CACHE[key]
-    else:
+    key = 'tasks'
+    tasks = memcache.get(key)
+    if tasks is None or update:
         tasks = db.GqlQuery('Select * from Task')
-        tasks = list(tasks.run())
-        CACHE[key] = tasks
+        tasks = list(tasks)
+        memcache.set(key, tasks)        
     return tasks
 
+
 def getAllComments(update = False):
-    key = 'allComments'
-    if not update and key in CACHE:
-        comments = CACHE[key]
-    else:        
-        comments = db.GqlQuery('Select * from Comment ORDER BY date DESC')        
-        comments = list(comments.run())
-        CACHE[key] = comments
+    key = 'comments'
+    comments = memcache.get(key)
+    if comments is None or update:
+        comments = db.GqlQuery('Select * from Comment ORDER BY task_id, date DESC')        
+        comments = list(comments)
+        memcache.set(key, comments)
     return comments
 
-def getTaskByKey(task_id, update = False):
-    key = task_id
-    if not update and key in CACHE:
-        task = CACHE[key]
-    else:
-        key = db.Key.from_path('Task',int(task_id), parent = task_key())
-        task = db.get(key)
-        if not task:
-            return
-        CACHE[key] = task
-    return task
+def getTaskByKey(task_id):
+    key = db.Key.from_path('Task',int(task_id), parent = task_key())
+    task = db.get(key)
+    if task:
+        return task 
+    return None
 
 ##########################################################################################
 ####        DB ACCESS   -   TASK PROCESS
 ##########################################################################################
 
-def commentTask(task_id, author, content):
-    if task_id and content :
-        com = Comment(task_id = int(task_id), author = author, content = content, date = datetime.datetime.now())
-        com.put()
-        getAllComments(True)  
-        return True
-    else:
-        return False
-
-def deleteTask(task_id, username):
-    if task_id and username:
-        key = db.Key.from_path('Task',int (task_id), parent = task_key())            
-        task = db.get(key)
-        #Get the username of the creator 
-        if task is not None:                
-            creator = task.author;
-            if username == creator:
-                task.deleteComments(int(task_id))
-                task.delete()
-                getAllTasks(True)
-                return (True, "Task has been correctly deleted")
-            else:
-                return (False, "You cannot delete tasks from other Bros modafucka !!!")
-    else:
-        return (False, "Task has not been deleted : data are missing")
-
-def deleteComment(comment_id):
-    key_comment = db.Key.from_path('Comment', int(comment_id))
-    commentToDel = db.get(key_comment)
-    if commentToDel:
-        commentToDel.delete()
-        getAllComments(True)
-        return True
-    return False
-
-
-def participateToTask(task_id, username):
-    key = db.Key.from_path('Task',int (task_id), parent = task_key())            
-    task = db.get(key)
+def participateToTask(task_id, username):    
+    task = getTaskByKey(task_id)    
     #If the task exists, add the user as a participant
-    if task is not None:                                
+    if task is not None:
+        oldTask = task                               
         task.addParticipant(int(task_id), username)
-        getTaskByKey(int(task_id), True)  
+        updateTaskInCache(oldTask, task)
         return True
     else:
         return False
@@ -143,13 +102,70 @@ def cancelParticipation(task_id, username):
         return False
     participants = task.getParticipant(task_id)    
     if participants is not None and username in participants:
+        oldTask = task
         task.participants.remove(self.user.username)                
         task.put()
-        getAllTasks(True)
-        getTaskByKey(task_id, True)
+        updateTaskInCache(oldTask, task)       
         return True
     return False
 
+
+def deleteTask(task_id, username):
+    if task_id and username:         
+        task = getTaskByKey(task_id)    
+        #Get the username of the creator 
+        if task is not None:                
+            creator = task.author;
+            if username == creator:
+                task_deleted = task
+                task.deleteComments(int(task_id))
+                task.delete()
+                deleteTaskInCache(task_deleted)                
+                return (True, "Task has been correctly deleted")
+            else:
+                return (False, "You cannot delete tasks from other Bros modafucka !!!")
+    else:
+        return (False, "Task has not been deleted : data are missing")
+
+def updateTaskInCache(oldTask, newTask):
+    key = 'tasks'
+    tasks = memcache.get(key)
+    for t, i in tasks, range(tasks):
+        if t.__eq__(oldTask):
+            tasks[i] = newTask
+            break
+    memcache.set(key, tasks)
+
+def deleteTaskInCache(task):
+    key = 'tasks'
+    tasks = memcache.get(key)
+    for t, i in tasks, range(tasks):
+        if t.__eq__(task):
+            tasks.pop(i)
+    memcache.set(key, tasks)
+
+
+##########################################################################################
+####        DB ACCESS   -   COMMENT PROCESS
+##########################################################################################
+
+def commentTask(task_id, author, content):
+    if task_id and content :
+        com = Comment(task_id = int(task_id), author = author, content = content, date = datetime.datetime.now())
+        com.put()
+        getAllComments(True)
+        return True
+    else:
+        return False
+
+def deleteComment(comment_id):
+    key_comment = db.Key.from_path('Comment', int(comment_id))
+    commentToDel = db.get(key_comment)
+    if commentToDel:
+        commentToDel.delete()
+        getAllComments(True)
+        return True
+    return False
 
 
 class HurbHandler(webapp2.RequestHandler):
@@ -189,7 +205,8 @@ class HurbHandler(webapp2.RequestHandler):
 
 class Main(HurbHandler):
     def get(self):
-        tasks = getAllTasks()        
+        tasks = getAllTasks()
+        
         if self.user:            
             self.render('home.html', tasks = tasks, username = self.user.username)            
         else:            
@@ -234,8 +251,8 @@ class Main(HurbHandler):
                 self.redirect('/')
 
 
-        tasks = getAllTasks(True)
-        comments = getAllComments(True)
+        tasks = getAllTasks()        
+        comments = getAllComments()
         self.render('home.html', tasks = tasks, comments = comments)
 
 
@@ -292,19 +309,22 @@ class NewTask(HurbHandler):
             self.render('newtask.html', **params)
         else:
             task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = convertedDate, location_lat = self.location_lat, location_lng = self.location_lng, reward = self.reward, participants = [])           
-            task.put()            
+            task.put()         
             self.redirect('/task/%s' % str(task.key().id())) 
 
 
 class TaskPage(HurbHandler):
     def get(self,task_id):
-        getAllTasks(True)
         task = getTaskByKey(task_id)
         if not task:
             self.error(404)
-            return       
+            return 
+        tasks = getAllTasks(True)        
         comments = getAllComments()  
-        self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
+        if self.user:
+            self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
+        else:
+            self.render("taskpermalink.html", task=task, username = "", comments = comments)
 
     def post(self, task_id):
         url_get = self.request.url

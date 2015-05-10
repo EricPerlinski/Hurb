@@ -51,6 +51,12 @@ class Comment(db.Model):
             }
         return d
 
+    def __str__(self):
+        return str(self.__dict__)
+
+    def __eq__(self, other): 
+        return self.__dict__ == other.__dict__
+
 
 ##########################################################################
 ###### 		Task class
@@ -144,6 +150,12 @@ class Task(db.Model):
         if username not in task.participants:
             task.participants.append(username)
             task.put()
+
+    def __str__(self):
+        return str(self.__dict__)
+
+    def __eq__(self, other): 
+        return self.__dict__ == other.__dict__
 
     
 
