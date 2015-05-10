@@ -12,6 +12,8 @@ import datetime
 
 import webapp2
 import jinja2
+import json
+
 template_dir= os.path.join(os.path.dirname(__file__),'templates');
 jinja_env=jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),autoescape=True);
 def render_str(template, **params):
@@ -165,6 +167,11 @@ class HurbHandler(webapp2.RequestHandler):
         t = jinja_env.get_template(template)
         return t.render(params)
 
+    def render_json(self,d):
+        json_txt = json.dumps(d)
+        self.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+        self.write(json_txt)
+
     def set_secure_cookie(self, name, val):
         cookie_val = make_secure_val(val)
         self.response.headers.add_header(
@@ -185,7 +192,12 @@ class HurbHandler(webapp2.RequestHandler):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
         self.user = uid and Bro.by_id(int(uid))
-        
+
+        if self.request.url.endswith('.json'):
+            self.format = 'json'
+        else:
+            self.format = 'html'
+
 
 class Main(HurbHandler):
     def get(self):
@@ -304,7 +316,14 @@ class TaskPage(HurbHandler):
             self.error(404)
             return       
         comments = getAllComments()  
-        self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
+        if self.format == 'html':
+            if self.user:
+                self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
+            else:
+                self.render("taskpermalink.html", task=task, username = "", comments = comments)
+        else:
+            self.render_json(task.as_dict())
+
 
     def post(self, task_id):
         url_get = self.request.url
@@ -453,10 +472,9 @@ class SaveUser(Signup):
 
 class UserPage(HurbHandler):
     def get(self,username):
-        if self.user.username == username:
+        if self.user and self.user.username == username:
             self.redirect("/profil")
-        else:
-            
+        else:            
             dateminusoneweek = datetime.datetime.now() - datetime.timedelta(days=7) 
             task = db.GqlQuery("Select * from Task")
             tasks = []
@@ -472,7 +490,16 @@ class UserPage(HurbHandler):
 
         #self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
 
-    
+
+class Tasks(HurbHandler):
+    def get(self):
+        tasks = Task.all().order('-date')
+        if self.format == 'html':
+            self.redirect('/')
+        else:
+            return self.render_json([t.as_dict() for t in tasks])
+
+
 class Profil(HurbHandler):
     def get(self):
         if self.user :
@@ -480,6 +507,13 @@ class Profil(HurbHandler):
             self.render('profil.html', user = self.user, username = self.user.username, profil = "profil",UserTask=UserTask)
         else:
             self.redirect('/login')
+
+class Contact(HurbHandler):
+    def get(self):
+        if self.user :
+            self.render('contact.html', user = self.user, username = self.user.username)
+        else:
+            self.render('contact.html')
 
 class Modify (Signup):
     def get (self):
@@ -511,9 +545,11 @@ application = webapp2.WSGIApplication([('/',Main),
 									   ('/profil',Profil),
                                        ('/delete',Delete),
                                        ('/login',Login),
+                                       ('/tasks(?:.json)?',Tasks),
                                        ('/task/([0-9]+)(?:.json)?', TaskPage),
                                        ('/logout', Logout),
-                                       ('/user/([0-9a-zA-Z]+)', UserPage),
+                                       ('/contact', Contact),
+                                       ('/user/([0-9a-zA-Z]+)(?:.json)?', UserPage),
                                        ('/signup',SaveUser),
                                        ('/newtask', NewTask),
                                        ('/profil/modify', Modify)],

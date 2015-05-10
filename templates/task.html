@@ -111,7 +111,6 @@
 
 <script type="text/javascript">
     $(document).ready(function(e){
-
         $(".commentForm").hide();
         $(".deleteForm").hide();
         $(".participateForm").hide();
@@ -120,6 +119,8 @@
 
         var url = document.URL;
         var pattern = /task/i
+
+
 
         if ( pattern.test(url) ){
           $(document.getElementById("permaLink")).hide();
