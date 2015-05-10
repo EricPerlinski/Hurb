@@ -201,11 +201,19 @@ class HurbHandler(webapp2.RequestHandler):
 
 class Main(HurbHandler):
     def get(self):
-        tasks = getAllTasks()        
-        if self.user:            
-            self.render('home.html', tasks = tasks, username = self.user.username)            
-        else:            
-            self.render('home.html', tasks = tasks)
+
+        if self.format == 'html':
+            tasks = getAllTasks()        
+            if self.user:            
+                self.render('home.html', tasks = tasks, username = self.user.username)            
+            else:            
+                self.render('home.html', tasks = tasks)
+        else:
+            tasks = Task.all().order('-date')
+            return self.render_json([t.as_dict() for t in tasks])
+
+
+        
 
     def post(self):
         
@@ -483,21 +491,25 @@ class SaveUser(Signup):
 
 class UserPage(HurbHandler):
     def get(self,username):
-        if self.user and self.user.username == username:
-            self.redirect("/profil")
-        else:            
-            dateminusoneweek = datetime.datetime.now() - datetime.timedelta(days=7) 
-            task = db.GqlQuery("Select * from Task")
-            UserTask = Task.GiveUserTask(username)   #on doit egalement faire une veriification sur le nom de l'user
-            participant=[]
-            for t in task:
-                if t.getParticipate(username):
-                    participant.append(t)
-            email=Bro.by_name(username).email
-            self.render("information.html",mail=email,username=username,UserTask=UserTask,participant=participant)
-                
+        if self.format == 'json':
+            user = Bro.by_name(username)
+            self.render_json(user.as_dict())
+        else:
+            if self.user and self.user.username == username:
+                self.redirect("/profil")
+            else:            
+                dateminusoneweek = datetime.datetime.now() - datetime.timedelta(days=7) 
+                task = db.GqlQuery("Select * from Task")
+                UserTask = Task.GiveUserTask(username)   #on doit egalement faire une veriification sur le nom de l'user
+                participant=[]
+                for t in task:
+                    if t.getParticipate(username):
+                        participant.append(t)
+                email=Bro.by_name(username).email
+                self.render("information.html",mail=email,username=username,UserTask=UserTask,participant=participant)
+                    
 
-        #self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
+            #self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
 
 
 class Tasks(HurbHandler):
@@ -512,14 +524,18 @@ class Tasks(HurbHandler):
 class Profil(HurbHandler):
     def get(self):
         if self.user :
-            UserTask=Task.GiveUserTask(self.user.username)
-            task = db.GqlQuery("Select * from Task")
-            participant=[]
-            for t in task:
-                if t.getParticipate(self.user.username):
-                    participant.append(t)
-            a=Task.GiveUserTask(self.user.username)
-            self.render('profil.html', user = self.user, username = self.user.username, profil = "profil",a=a,UserTask=UserTask,participant=participant)
+            if self.format == 'json':
+                user = Bro.by_name(self.user.username)
+                self.render_json(user.as_dict_profil())
+            else:
+                UserTask=Task.GiveUserTask(self.user.username)
+                task = db.GqlQuery("Select * from Task")
+                participant=[]
+                for t in task:
+                    if t.getParticipate(self.user.username):
+                        participant.append(t)
+                a=Task.GiveUserTask(self.user.username)
+                self.render('profil.html', user = self.user, username = self.user.username, profil = "profil",a=a,UserTask=UserTask,participant=participant)
         else:
             self.redirect('/login')
 
@@ -556,13 +572,13 @@ class Delete (HurbHandler):
         self.user=None
         self.redirect('/')
 
-application = webapp2.WSGIApplication([('/',Main),
-									   ('/profil',Profil),
+application = webapp2.WSGIApplication([('/(?:.json)?',Main),
+									   ('/profil(?:.json)?',Profil),
                                        ('/delete',Delete),
                                        ('/login',Login),
                                        ('/tasks(?:.json)?',Tasks),
                                        ('/task/([0-9]+)(?:.json)?', TaskPage),
-                                       ('/logout', Logout),
+                                       ('/logout', Logout), 
                                        ('/contact', Contact),
                                        ('/user/([0-9a-zA-Z]+)(?:.json)?', UserPage),
                                        ('/signup',SaveUser),

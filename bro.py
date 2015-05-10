@@ -4,6 +4,7 @@
 from google.appengine.ext import db
 from security import make_pw_hash
 from security import valid_pw
+from task import *
 
 
 def bro_key(name = 'default'):
@@ -34,6 +35,41 @@ class Bro(db.Model):
                     email = email,
                     phone=phone,
                     address=address)
+
+    def as_dict(self):
+        tasksAuthor = []
+        tasksParticipate = []
+        tasks = Task.all()
+        for t in tasks:
+            if t.getParticipate(self.username):
+                tasksParticipate.append(t.as_dict())
+            if t.author == self.username:
+                tasksAuthor.append(t.as_dict())
+
+        d = {'username' : self.username,
+             'tasks-author' : tasksAuthor,
+             'tasks-participate' : tasksParticipate
+            }
+        return d
+
+    def as_dict_profil(self):
+        tasksAuthor = []
+        tasksParticipate = []
+        tasks = Task.all()
+        for t in tasks:
+            if t.getParticipate(self.username):
+                tasksParticipate.append(t.as_dict())
+            if t.author == self.username:
+                tasksAuthor.append(t.as_dict())
+
+        d = {'username' : self.username,
+             'address' : self.address,
+             'phone' : self.phone,
+             'email' : self.email,
+             'tasks-author' : tasksAuthor,
+             'tasks-participate' : tasksParticipate
+            }
+        return d
 
     @classmethod
     def login(cls, name, pw):
