@@ -47,7 +47,7 @@
 
               <!-- forms -->
 
-              <form id="participateForm{{t.key().id()}}" class="participateForm" name="participateForm" method="POST" >
+              <form id="participateForm{{t.key().id()}}" class="participateForm" name="participateForm" method="POST"  >
                 <input type='hidden' value="{{ t.key().id() }}" name="task_id"/>
                 <label> Click the button below if you want to participate </label> <br>  
                 <button type="submit" class="btn btn-default" value="submit" name="participateTask">Participate !</button>                
@@ -59,7 +59,7 @@
                 <button type="submit" class="btn btn-default" value="submit" name="cancelParticipation">Leave this task !</button>                
               </form>
 	      
-              <form id="commentForm{{t.key().id()}}" class="commentForm" name="commentForm" method="POST" >
+              <form id="commentForm{{t.key().id()}}" class="commentForm" name="commentForm" method="POST">
 		</br>
                 <input type='hidden' value="{{ t.key().id() }}" name="task_id"/>                
                 <textarea id="commentContent{{t.key().id()}}" name="commentContent" style="background:#FFCC66;resize:none;"></textarea><br>
@@ -68,7 +68,7 @@
               
               <form id="deleteForm{{t.key().id()}}" class="deleteForm" name="deleteForm" method="POST" >
                 <input type='hidden' value="{{ t.key().id() }}" name="task_id"/>
-                <label> Are you sure you want to delete this stask ? </label> <br>                
+                <label> Are you sure you want to delete this stask ? </label> <br>             
                 <button type="submit" class="btn btn-danger" value="submit" name="deleteTask">DELETE</button>
               </form>
 	      

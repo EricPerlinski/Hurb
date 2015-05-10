@@ -512,7 +512,13 @@ class Profil(HurbHandler):
     def get(self):
         if self.user :
             UserTask=Task.GiveUserTask(self.user.username)
-            self.render('profil.html', user = self.user, username = self.user.username, profil = "profil",UserTask=UserTask)
+            task = db.GqlQuery("Select * from Task")
+            participant=[]
+            for t in task:
+                if t.getParticipate(self.user.username):
+                    participant.append(t)
+            a=Task.GiveUserTask(self.user.username)
+            self.render('profil.html', user = self.user, username = self.user.username, profil = "profil",a=a,UserTask=UserTask,participant=participant)
         else:
             self.redirect('/login')
 
