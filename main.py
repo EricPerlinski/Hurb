@@ -681,9 +681,34 @@ class Modify (Signup):
 
 class Delete (HurbHandler):
     def get(self):
-        Bro.Deleted(self.user.username)
-        self.user=None
+        if self.user :
+            broName = self.user.username
+            #get all tasks created by the bro
+            taskCreated = Task.GiveUserTask(broName)
+            for t in taskCreated:
+                deleteTask(str(t.key().id()), broName)
+
+            # get each comment published by the bro and delete them
+            comments = db.GqlQuery("Select * from Comment where author =:1", broName)
+            for c in comments:
+                c.delete()
+                getCommentsOfTasks(str(t.key().id()), True)
+
+            # get all tasks in which the bro participates
+            tasks = db.GqlQuery("Select * from Task")
+            taskParticipation = []
+            for t in tasks:
+                if t.getParticipate(broName):
+                    taskParticipation.append(t)
+                cancelParticipation(str(t.key().id()), broName)
+           
+
+            getAllTasks(True)
+            Bro.Deleted(self.user.username)
+            self.user = None
+
         self.redirect('/')
+        
 
 application = webapp2.WSGIApplication([('/(?:.json)?',Main),
 									   ('/profil(?:.json)?',Profil),
