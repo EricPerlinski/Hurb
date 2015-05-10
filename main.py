@@ -289,13 +289,17 @@ class HurbHandler(webapp2.RequestHandler):
 
 class Main(HurbHandler):
     def get(self):
-
         if self.format == 'html':
-            tasks = getAllTasks()        
-            if self.user:            
-                self.render('home.html', tasks = tasks, username = self.user.username)            
-            else:            
-                self.render('home.html', tasks = tasks)
+            tasks = getAllTasks() 
+            if self.user:
+                 self.render('home.html', tasks = tasks, username = self.user.username)
+            else:
+              errorlog="you need to be log in"
+              self.response.out.write(self.request.get('errorlog'))
+              if self.request.get('errorlog'):  
+                 self.render('home.html', tasks = tasks,errorlog=errorlog)
+              else:
+                 self.render('home.html', tasks = tasks)
         else:
             tasks = Task.all().order('-date')
             return self.render_json([t.as_dict() for t in tasks])
@@ -349,7 +353,7 @@ class Main(HurbHandler):
         else:
             # tasks = getAllTasks(True)
             # comments = getAllComments(True)
-            errorlog = "you need to be log in if you want to add a comment or participate"
+            
             self.render('home.html',tasks = tasks, comments = comments,errorlog=errorlog)
                    
 
@@ -504,12 +508,10 @@ class TaskPage(HurbHandler):
                 self.response.out.write("Error : "+error_log)
             else:
                 self.redirect(redirectTo)
-
         else:
             tasks = getAllTasks(True)
-            comments = getAllComments(True)
-            errorlog="you need to be log in if you want to add a comment or participate"
-            self.render('home.html',tasks = tasks, comments = comments,errorlog=errorlog)
+            
+            self.redirect('/?errorlog=1')
 
 
 class Signup(HurbHandler):
