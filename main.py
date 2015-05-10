@@ -267,7 +267,7 @@ class TaskPage(HurbHandler):
             self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
         else:
             self.render_json(task.as_dict())
-        
+
 
     def post(self, task_id):
         url_get = self.request.url
@@ -444,7 +444,16 @@ class UserPage(HurbHandler):
 
         #self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
 
-    
+
+class Tasks(HurbHandler):
+    def get(self):
+        tasks = Task.all().order('-date')
+        if self.format == 'html':
+            self.redirect('/')
+        else:
+            return self.render_json([t.as_dict() for t in tasks])
+
+
 class Profil(HurbHandler):
     def get(self):
         if self.user :
@@ -490,7 +499,7 @@ application = webapp2.WSGIApplication([('/',Main),
 									   ('/profil',Profil),
                                        ('/delete',Delete),
                                        ('/login',Login),
-                                       ('/tasks',Tasks)
+                                       ('/tasks(?:.json)?',Tasks),
                                        ('/task/([0-9]+)(?:.json)?', TaskPage),
                                        ('/logout', Logout),
                                        ('/contact', Contact),
