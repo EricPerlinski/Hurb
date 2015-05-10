@@ -16,7 +16,7 @@
             {{t._render_text | safe}}
           </p>
           
-          <div id="btnGroup" class="btn-group">
+          <div id="btnGroup{{t.key().id()}}" class="btn-group">
 
             {% if t.getParticipant(t.key().id()) is not none and username not in t.getParticipant(t.key().id()) %}
               <button class="btn btn-default" type="button" id="participateBtn{{t.key().id()}}" name="participateBtn">
@@ -191,7 +191,7 @@
         }
         else{
           //If not permalink : hide all the button
-          $(document.getElementById("btnGroup")).hide();
+          $(document.getElementById("btnGroup{{t.key().id()}}")).hide();
         }
 
        
