@@ -49,10 +49,52 @@ def changeToDate(taskDate):
     return date
 
 
+##########################################################################################
+####        CACHE SYSTEM 
+##########################################################################################
+
+CACHE = {}
+def getAllTasks(update = False):
+    key = 'allTasks'
+    if not update and key in CACHE:
+        tasks = CACHE[key]
+    else:
+        tasks = db.GqlQuery('Select * from Task')
+        tasks = list(tasks.run())
+        CACHE[key] = tasks
+    return tasks
+
+def getAllComments(update = False):
+    key = 'allComments'
+    if not update and key in CACHE:
+        comments = CACHE[key]
+    else:        
+        comments = db.GqlQuery('Select * from Comment ORDER BY date DESC')        
+        comments = list(comments.run())
+        CACHE[key] = comments
+    return comments
+
+def getTaskByKey(task_id, update = False):
+    key = task_id
+    if not update and key in CACHE:
+        task = CACHE[key]
+    else:
+        key = db.Key.from_path('Task',int(task_id), parent = task_key())
+        task = db.get(key)
+        if not task:
+            return
+        CACHE[key] = task
+    return task
+
+##########################################################################################
+####        DB ACCESS   -   TASK PROCESS
+##########################################################################################
+
 def commentTask(task_id, author, content):
     if task_id and content :
         com = Comment(task_id = int(task_id), author = author, content = content, date = datetime.datetime.now())
-        com.put()        
+        com.put()
+        getAllComments(True)  
         return True
     else:
         return False
@@ -67,11 +109,22 @@ def deleteTask(task_id, username):
             if username == creator:
                 task.deleteComments(int(task_id))
                 task.delete()
+                getAllTasks(True)
                 return (True, "Task has been correctly deleted")
             else:
                 return (False, "You cannot delete tasks from other Bros modafucka !!!")
     else:
         return (False, "Task has not been deleted : data are missing")
+
+def deleteComment(comment_id):
+    key_comment = db.Key.from_path('Comment', int(comment_id))
+    commentToDel = db.get(key_comment)
+    if commentToDel:
+        commentToDel.delete()
+        getAllComments(True)
+        return True
+    return False
+
 
 def participateToTask(task_id, username):
     key = db.Key.from_path('Task',int (task_id), parent = task_key())            
@@ -79,12 +132,28 @@ def participateToTask(task_id, username):
     #If the task exists, add the user as a participant
     if task is not None:                                
         task.addParticipant(int(task_id), username)
+        getTaskByKey(int(task_id), True)  
         return True
     else:
         return False
 
+def cancelParticipation(task_id, username):
+    task = getTaskByKey(task_id)
+    if not task:
+        return False
+    participants = task.getParticipant(task_id)    
+    if participants is not None and username in participants:
+        task.participants.remove(self.user.username)                
+        task.put()
+        getAllTasks(True)
+        getTaskByKey(task_id, True)
+        return True
+    return False
+
+
 
 class HurbHandler(webapp2.RequestHandler):
+
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
@@ -116,17 +185,15 @@ class HurbHandler(webapp2.RequestHandler):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
         self.user = uid and Bro.by_id(int(uid))
-
+        
 
 class Main(HurbHandler):
     def get(self):
-        
-        if self.user:   
-            tasks = Task.all()            
+        tasks = getAllTasks()        
+        if self.user:            
             self.render('home.html', tasks = tasks, username = self.user.username)            
-        else:
-            tasks = Task.all()
-            self.render('home.html',tasks = tasks)
+        else:            
+            self.render('home.html', tasks = tasks)
 
     def post(self):
         
@@ -141,7 +208,7 @@ class Main(HurbHandler):
         if self.comment :
             if not commentTask(self.task_id, self.user.username, self.content):                
                 self.response.out.write("Comment has not been saved")
-            else:
+            else:                                
                 self.redirect('/')
 
         #Delete the task with its comments
@@ -162,23 +229,13 @@ class Main(HurbHandler):
                 self.redirect('/')
 
         #Leave a task:
-        if self.cancel:
-            key = db.Key.from_path('Task',int (self.task_id), parent = task_key())
-            self.task = db.get(key)
-            if not self.task:
-                self.error(404)
-                return
-            #Is the user
-            participants = self.task.getParticipant(self.task_id)
-            #task.getNumberOfParticipants(self.task_id) > 0 
-            if participants is not None and self.user.username in participants:                
-                self.task.participants.remove(self.user.username)
-                self.task.put()
-            self.redirect('/')
+        if self.cancel: 
+            if cancelParticipation(self.task_id, self.user.username):
+                self.redirect('/')
 
 
-        tasks = Task.all()
-        comments = Comment.all()
+        tasks = getAllTasks(True)
+        comments = getAllComments(True)
         self.render('home.html', tasks = tasks, comments = comments)
 
 
@@ -234,23 +291,19 @@ class NewTask(HurbHandler):
         if have_error:
             self.render('newtask.html', **params)
         else:
-            
-            task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = convertedDate, location_lat = self.location_lat, location_lng = self.location_lng, reward = self.reward, participants = [])
-
-            task.put()
+            task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = convertedDate, location_lat = self.location_lat, location_lng = self.location_lng, reward = self.reward, participants = [])           
+            task.put()            
             self.redirect('/task/%s' % str(task.key().id())) 
 
 
 class TaskPage(HurbHandler):
     def get(self,task_id):
-        key = db.Key.from_path('Task',int (task_id), parent = task_key())
-        task = db.get(key)
-        comments = Comment.all()
-        comments.order('date')        
+        getAllTasks(True)
+        task = getTaskByKey(task_id)
         if not task:
             self.error(404)
-            return
-
+            return       
+        comments = getAllComments()  
         self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
 
     def post(self, task_id):
@@ -268,9 +321,8 @@ class TaskPage(HurbHandler):
         self.deleteComment = self.request.get('deleteCom')
         self.comment_id = self.request.get('comment_id')
 
-        key = db.Key.from_path('Task',int (self.task_id), parent = task_key())
-        self.task = db.get(key)
-        if not self.task:
+        task = getTaskByKey(task_id)
+        if not task:
             self.error(404)
             return
 
@@ -291,32 +343,24 @@ class TaskPage(HurbHandler):
                 self.redirect(redirectTo)
 
         if self.deleteComment:
-            key_comment = db.Key.from_path('Comment', int(self.comment_id))
-            commentToDel = db.get(key_comment)
-            commentToDel.delete()
-            self.redirect(redirectTo)
+            if deleteComment(self.comment_id):
+                self.redirect(redirectTo)
 
 
         #participate to the task
-        if self.participate :
-            #self.response.out.write("You really want to participate !!!")
+        if self.participate :            
             if not participateToTask(self.task_id, self.user.username):                
                 self.response.out.write("Task doesn't exist anymore")
             else:
                 self.redirect(redirectTo)
-        
-        if self.cancel:
-            #Is the user
-            participants = self.task.getParticipant(self.task_id)
-            #task.getNumberOfParticipants(self.task_id) > 0 
-            if participants is not None and self.user.username in participants:                
-                self.task.participants.remove(self.user.username)
-                self.task.put()
-            self.redirect(redirectTo)
 
-        comments = Comment.all()
-        comments.order('date')   
-        self.render("taskpermalink.html", task=self.task, username = self.user.username, comments = comments)
+        #Leave a task:
+        if self.cancel: 
+            if cancelParticipation(self.task_id, self.user.username):
+                self.redirect(redirectTo)
+
+        comments = getAllComments()  
+        self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
         
 
 

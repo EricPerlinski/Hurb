@@ -6,9 +6,8 @@
 
 
 {% block tasks %}
-	
 
-	{% if tasks.count() > 0  %}
+	{% if tasks %}
 
     	{% for t in tasks %}
 			{{t.render(username) | safe}}		
