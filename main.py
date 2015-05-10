@@ -254,7 +254,7 @@ class Main(HurbHandler):
             tasks = getAllTasks(True)
             comments = getAllComments(True)
             errorlog="you need to be log if you want to add a comment"
-            self.render('home.html',tasks = tasks,errorlog=errorlog)
+            self.render('home.html',tasks = tasks, comments = comments,errorlog=errorlog)
 
 
 
@@ -483,15 +483,12 @@ class UserPage(HurbHandler):
         else:            
             dateminusoneweek = datetime.datetime.now() - datetime.timedelta(days=7) 
             task = db.GqlQuery("Select * from Task")
-            tasks = []
-            for t in task: 
+            UserTask = Task.GiveUserTask(username)   #on doit egalement faire une veriification sur le nom de l'user
+            participant=[]
+            for t in task:
                 if t.getParticipate(username):
-                    tasks.append(t.title)
-            
-            self.response.out.write("Upcomming task : <br/>")
-            for i in tasks:
-                self.response.out.write( i + "<br/>")
-            
+                    participant.append(t)
+            self.render("information.html",username=username,UserTask=UserTask,participant=participant)
                 
 
         #self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
