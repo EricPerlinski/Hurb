@@ -50,6 +50,12 @@ class Comment(db.Model):
             }
         return d
 
+    def __str__(self):
+        return str(self.__dict__)
+
+    def __eq__(self, other): 
+        return self.__dict__ == other.__dict__
+
 
 ##########################################################################
 ###### 		Task class
@@ -128,13 +134,6 @@ class Task(db.Model):
         TaskUser= db.GqlQuery('Select * from Task where author= :1',username)
         return TaskUser.run()
 
-    def deleteComments(cls, task_id):
-        #Delete all comments relative to the Task        
-        taskComments = Comment.all()
-        taskComments.filter("task_id =", task_id)
-        for comment in taskComments.run():
-            comment.delete()
-
     def getParticipant(cls,task_id):
         key = db.Key.from_path('Task', int(task_id), parent = task_key())
         task = db.get(key)
@@ -156,6 +155,12 @@ class Task(db.Model):
         if username not in task.participants:
             task.participants.append(username)
             task.put()
+
+    def __str__(self):
+        return str(self.__dict__)
+
+    def __eq__(self, other): 
+        return self.__dict__ == other.__dict__
 
     
 
