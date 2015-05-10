@@ -3,6 +3,7 @@
 {% block information %}
   <div style="margin: 0 auto;width:20%;">
 		<h4 class="list-group-item active" style="text-align:center;">{{username}} </h4>
+		<h6 style="text-align:center;">mail:{%if mail%}{{mail}}{%else%}?{%endif%}</h6>
   </div>
 <h4 class="list-group-item active">Created Tasks</h4>
    			{% if UserTask %}

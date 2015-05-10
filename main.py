@@ -493,7 +493,8 @@ class UserPage(HurbHandler):
             for t in task:
                 if t.getParticipate(username):
                     participant.append(t)
-            self.render("information.html",username=username,UserTask=UserTask,participant=participant)
+            email=Bro.by_name(username).email
+            self.render("information.html",mail=email,username=username,UserTask=UserTask,participant=participant)
                 
 
         #self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
