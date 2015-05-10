@@ -58,10 +58,11 @@
                 <label> Click the button below if you want to cancel your participation </label> <br>  
                 <button type="submit" class="btn btn-default" value="submit" name="cancelParticipation">Leave this task !</button>                
               </form>
-
+	      
               <form id="commentForm{{t.key().id()}}" class="commentForm" name="commentForm" method="POST" >
+		</br>
                 <input type='hidden' value="{{ t.key().id() }}" name="task_id"/>                
-                <textarea id="commentContent{{t.key().id()}}" name="commentContent" style="resize:none;"></textarea><br>
+                <textarea id="commentContent{{t.key().id()}}" name="commentContent" style="background:#FFCC66;resize:none;"></textarea><br>
                 <button type="submit" class="btn btn-default" value="submit" name="commentSend">Add a Comment !</button>
               </form>
               

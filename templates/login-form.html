@@ -1,27 +1,25 @@
 {% extends "header.html" %}
 
 {% block content %}
-    <h2>Login</h2>
-
+    <div class="container" style="text-align: center;margin-top:10em;">
+  	<h2 >Login</h2>
+    </div>
     <form method="post">
     
-    <div class = "form-group">
+    <div class = "container" style="width:40em;">
       <label for ="username"> Username </label>
        <input type="text" name="username" value="{{username}}">
     </div>
 
-    <div class = "form-group">
+    <div class = "container" style="width:40em;margin-bottom:10em;">
       <label for ="username"> Password </label>
       <input type="password" name="password" value="">
+      <input type="submit" value="connect">
     </div>
 
     <div class="error">
         {{error}}
       </div>
-
-    <div class = "form-group">
-      <input type="submit">
-    </div>
 
 
 {% endblock %}
