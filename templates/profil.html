@@ -50,8 +50,8 @@
 		<div class="profil-area">
 			<h3 class="list-group-item active" style="text-align:center;width=20em;margin-top:3em;">My Tasks</br></h3>
 			{% if UserTask %}
-			  {%for usertask in UserTask %} 
-			  <p> {{usertask.render(username) | safe }}</p>
+			  {%for t in UserTask %} 
+			  <p> {{t.render(username) | safe }}</p>
 			  {% endfor %}
 			{% endif %}
 		</div>
@@ -61,18 +61,6 @@
    			{% if participant %}
 			  {%for p in participant %} 
 			  <p> {{p.render(p.author) | safe }}</p>
-			  {% endfor %}
-			{% endif %}
-		</div>
-
-		<div class="profil-area">
-			<h3 class="list-group-item active" style="text-align:center;width=20em;margin-top:3em;">Accepted Tasks</br></h3>
-			{% if a %}
-			  {%for usertask in a %} 
-			    {% if usertask.participants %}
-					<p> {{usertask.render(username) | safe }}</p>
-				{%endif%}
-				
 			  {% endfor %}
 			{% endif %}
 		</div>

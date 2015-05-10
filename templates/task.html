@@ -16,7 +16,7 @@
             {{t._render_text | safe}}
           </p>
           
-          <div class="btn-group">
+          <div id="btnGroup" class="btn-group">
 
             {% if t.getParticipant(t.key().id()) is not none and username not in t.getParticipant(t.key().id()) %}
               <button class="btn btn-default" type="button" id="participateBtn{{t.key().id()}}" name="participateBtn">
@@ -60,7 +60,7 @@
               </form>
 	      
               <form id="commentForm{{t.key().id()}}" class="commentForm" name="commentForm" method="POST">
-		</br>
+		            </br>
                 <input type='hidden' value="{{ t.key().id() }}" name="task_id"/>                
                 <textarea id="commentContent{{t.key().id()}}" name="commentContent" style="background:#FFCC66;resize:none;"></textarea><br>
                 <button type="submit" class="btn btn-default" value="submit" name="commentSend">Add a Comment !</button>
@@ -127,66 +127,74 @@
 
         if ( pattern.test(url) ){
           $(document.getElementById("permaLink")).hide();
-          $(document.getElementById("participantsDiv")).show();          
-        }else{
-          $(document.getElementById("commentBtn{{ t.key().id() }}")).hide();
+          $(document.getElementById("participantsDiv")).show();
+
+          //Click on comment --> display comemnt form 
+          $(document.getElementById("commentBtn{{ t.key().id() }}")).click(function(e) {
+              $(".deleteForm").hide();
+              $(".participateForm").hide();
+              $('.cancelParticipateForm').hide();
+
+              if ($(document.getElementById("commentForm{{ t.key().id() }}")).is(':hidden')){
+                $(document.getElementById("commentForm{{ t.key().id() }}")).show();
+                $(document.getElementById("commentContent{{t.key().id()}}")).focus();            
+              }else{
+                $(document.getElementById("commentForm{{ t.key().id() }}")).hide();
+              }
+              e.preventDefault();
+          });
+
+          //Click on delete --> display delete form 
+          $(document.getElementById("deleteBtn{{ t.key().id() }}")).click(function(e) {                    
+              $(".commentForm").hide();
+              $(".participateForm").hide();
+              $('.cancelParticipateForm').hide();
+
+              if ($(document.getElementById("deleteForm{{ t.key().id() }}")).is(':hidden')){
+                $(document.getElementById("deleteForm{{ t.key().id() }}")).show();                         
+              }else{
+                $(document.getElementById("deleteForm{{ t.key().id() }}")).hide();
+              }      
+              e.preventDefault();
+          });
+
+          //Click on participate --> display participate form 
+          $(document.getElementById("participateBtn{{ t.key().id() }}")).click(function(e) {                    
+              $(".commentForm").hide();
+              $(".deleteForm").hide();
+              $('.cancelParticipateForm').hide();
+
+              if ($(document.getElementById("participateForm{{ t.key().id() }}")).is(':hidden')){
+                $(document.getElementById("participateForm{{ t.key().id() }}")).show();                         
+                $(document.getElementById("participateForm{{ t.key().id() }}")).innerHTML = "You have been added as a participant to this task !";
+              }else{
+                $(document.getElementById("participateForm{{ t.key().id() }}")).hide();
+              }
+              e.preventDefault();
+          });
+
+          //Click on cancelParticipate --> display cancelParticipate form 
+          $(document.getElementById("cancelParticipateBtn{{t.key().id()}}")).click(function(e) {
+              $(".commentForm").hide();
+              $(".deleteForm").hide();
+              $(".participateForm").hide();
+
+              if ($(document.getElementById("cancelParticipateForm{{ t.key().id() }}")).is(':hidden')){
+                $(document.getElementById("cancelParticipateForm{{ t.key().id() }}")).show();                         
+                $(document.getElementById("cancelParticipateForm{{ t.key().id() }}")).innerHTML = "You have been pull out of this task !";
+              }else{
+                $(document.getElementById("cancelParticipateForm{{ t.key().id() }}")).hide();
+              }
+              e.preventDefault();
+
+          });          
+        }
+        else{
+          //If not permalink : hide all the button
+          $(document.getElementById("btnGroup")).hide();
         }
 
-        $(document.getElementById("commentBtn{{ t.key().id() }}")).click(function(e) {
-            $(".deleteForm").hide();
-            $(".participateForm").hide();
-            $('.cancelParticipateForm').hide();
-
-            if ($(document.getElementById("commentForm{{ t.key().id() }}")).is(':hidden')){
-              $(document.getElementById("commentForm{{ t.key().id() }}")).show();
-              $(document.getElementById("commentContent{{t.key().id()}}")).focus();            
-            }else{
-              $(document.getElementById("commentForm{{ t.key().id() }}")).hide();
-            }
-            e.preventDefault();
-        });
-
-        $(document.getElementById("deleteBtn{{ t.key().id() }}")).click(function(e) {                    
-            $(".commentForm").hide();
-            $(".participateForm").hide();
-            $('.cancelParticipateForm').hide();
-
-            if ($(document.getElementById("deleteForm{{ t.key().id() }}")).is(':hidden')){
-              $(document.getElementById("deleteForm{{ t.key().id() }}")).show();                         
-            }else{
-              $(document.getElementById("deleteForm{{ t.key().id() }}")).hide();
-            }      
-            e.preventDefault();
-        });
-
-        $(document.getElementById("participateBtn{{ t.key().id() }}")).click(function(e) {                    
-            $(".commentForm").hide();
-            $(".deleteForm").hide();
-            $('.cancelParticipateForm').hide();
-
-            if ($(document.getElementById("participateForm{{ t.key().id() }}")).is(':hidden')){
-              $(document.getElementById("participateForm{{ t.key().id() }}")).show();                         
-              $(document.getElementById("participateForm{{ t.key().id() }}")).innerHTML = "You have been added as a participant to this task !";
-            }else{
-              $(document.getElementById("participateForm{{ t.key().id() }}")).hide();
-            }
-            e.preventDefault();
-        });
-
-        $(document.getElementById("cancelParticipateBtn{{t.key().id()}}")).click(function(e) {
-            $(".commentForm").hide();
-            $(".deleteForm").hide();
-            $(".participateForm").hide();
-
-            if ($(document.getElementById("cancelParticipateForm{{ t.key().id() }}")).is(':hidden')){
-              $(document.getElementById("cancelParticipateForm{{ t.key().id() }}")).show();                         
-              $(document.getElementById("cancelParticipateForm{{ t.key().id() }}")).innerHTML = "You have been pull out of this task !";
-            }else{
-              $(document.getElementById("cancelParticipateForm{{ t.key().id() }}")).hide();
-            }
-            e.preventDefault();
-
-        });
+       
         
 
 
