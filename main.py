@@ -424,7 +424,8 @@ class TaskPage(HurbHandler):
             if self.user:
                 self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
             else:
-                self.response.out.write("GET : no user")   
+                self.render("taskpermalink.html", task=task, username = "", comments = comments)
+                #self.response.out.write("GET : no user")   
         else:
             self.render_json(task.as_dict())
 
@@ -648,6 +649,7 @@ class Profil(HurbHandler):
         else:
             self.redirect('/login')
 
+    
 class Contact(HurbHandler):
     def get(self):
         if self.user :
