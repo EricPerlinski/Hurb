@@ -6,7 +6,7 @@
 
 
 {% block tasks %}
-
+	{% if errorlog %} <p style="text-align: center;color:#BA1A1A;font-size:20px;margin-top:3em;">{{errorlog}}</p> {%endif%}
 	{% if tasks %}
 
     	{% for t in tasks %}

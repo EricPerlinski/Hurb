@@ -216,39 +216,45 @@ class Main(HurbHandler):
         self.participate = self.request.get('participateTask')
         self.cancel = self.request.get('cancelParticipation')
 
-        #comment the Task
-        if self.comment :
-            if not commentTask(self.task_id, self.user.username, self.content):                
-                self.response.out.write("Comment has not been saved")
-            else:                                
-                self.redirect('/')
+        if self.user: 
+            #comment the Task
+            if self.comment :
+                if not commentTask(self.task_id, self.user.username, self.content):                
+                    self.response.out.write("Comment has not been saved")
+                else:                                
+                    self.redirect('/')
 
-        #Delete the task with its comments
-        if self.delete :
-            status,msg = deleteTask(self.task_id, self.user.username)
-            if not status:                
-                self.response.out.write("%s" % msg)
-            else:
-                self.response.out.write("%s" % msg)
-                self.redirect('/')
+            #Delete the task with its comments
+            if self.delete :
+                status,msg = deleteTask(self.task_id, self.user.username)
+                if not status:                
+                    self.response.out.write("%s" % msg)
+                else:
+                    self.response.out.write("%s" % msg)
+                    self.redirect('/')
 
-        #participate to the task
-        if self.participate :
-            #self.response.out.write("You really want to participate !!!")
-            if not participateToTask(self.task_id, self.user.username):                
-                self.response.out.write("Task doesn't exist anymore")
-            else:
-                self.redirect('/')
+            #participate to the task
+            if self.participate :
+                #self.response.out.write("You really want to participate !!!")
+                if not participateToTask(self.task_id, self.user.username):                
+                    self.response.out.write("Task doesn't exist anymore")
+                else:
+                    self.redirect('/')
 
-        #Leave a task:
-        if self.cancel: 
-            if cancelParticipation(self.task_id, self.user.username):
-                self.redirect('/')
+            #Leave a task:
+            if self.cancel: 
+                if cancelParticipation(self.task_id, self.user.username):
+                    self.redirect('/')
 
 
-        tasks = getAllTasks(True)
-        comments = getAllComments(True)
-        self.render('home.html', tasks = tasks, comments = comments)
+            tasks = getAllTasks(True)
+            comments = getAllComments(True)
+            self.render('home.html', tasks = tasks, comments = comments)
+        else:
+            tasks = getAllTasks(True)
+            comments = getAllComments(True)
+            errorlog="you need to be log if you want to add a comment"
+            self.render('home.html',tasks = tasks,errorlog=errorlog)
 
 
 
