@@ -44,10 +44,9 @@ class Comment(db.Model):
 
     def as_dict(self):
         time_fmt = '%d-%m-%Y %H:%M'
-        d = {'task_id': self.task_id,
-        	 'author' : self.author,
+        d = {'author' : self.author,
         	 'content': self.content,
-             'date': self.date.strftime(time_fmt)
+             'date-content': self.date.strftime(time_fmt)
             }
         return d
 
@@ -114,7 +113,7 @@ class Task(db.Model):
         time_fmt = '%d-%m-%Y %H:%M'
         d = {'title': self.title,
              'description': self.description,
-             'date': self.date.strftime(time_fmt),
+             'date-event': self.date.strftime(time_fmt),
              'author' : self.author,
              'location_lat' : self.location_lat,
              'location_lng' : self.location_lng,

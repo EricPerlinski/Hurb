@@ -267,7 +267,7 @@ class TaskPage(HurbHandler):
             self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
         else:
             self.render_json(task.as_dict())
-
+        
 
     def post(self, task_id):
         url_get = self.request.url
@@ -490,6 +490,7 @@ application = webapp2.WSGIApplication([('/',Main),
 									   ('/profil',Profil),
                                        ('/delete',Delete),
                                        ('/login',Login),
+                                       ('/tasks',Tasks)
                                        ('/task/([0-9]+)(?:.json)?', TaskPage),
                                        ('/logout', Logout),
                                        ('/contact', Contact),
