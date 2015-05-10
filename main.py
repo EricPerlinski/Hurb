@@ -5,6 +5,7 @@
 import os
 import random
 import datetime
+from google.appengine.api import memcache
 
 ##########################################################################################
 ####		WEB RELATIVES IMPORT AND CONFIGURATIONS
@@ -55,86 +56,68 @@ def changeToDate(taskDate):
 ####        CACHE SYSTEM 
 ##########################################################################################
 
-CACHE = {}
+
 def getAllTasks(update = False):
-    key = 'allTasks'
-    if not update and key in CACHE:
-        tasks = CACHE[key]
-    else:
+    key = 'tasks'
+    tasks = memcache.get(key)
+    if tasks is None or update:
         tasks = db.GqlQuery('Select * from Task')
-        tasks = list(tasks.run())
-        CACHE[key] = tasks
+        tasks = list(tasks)
+        memcache.set(key, tasks)        
     return tasks
 
-def getAllComments(update = False):
-    key = 'allComments'
-    if not update and key in CACHE:
-        comments = CACHE[key]
-    else:        
-        comments = db.GqlQuery('Select * from Comment ORDER BY date DESC')        
-        comments = list(comments.run())
-        CACHE[key] = comments
-    return comments
 
-def getTaskByKey(task_id, update = False):
+def getCommentsOfTasks(task_id, update = False):
     key = task_id
-    if not update and key in CACHE:
-        task = CACHE[key]
-    else:
-        key = db.Key.from_path('Task',int(task_id), parent = task_key())
-        task = db.get(key)
-        if not task:
-            return
-        CACHE[key] = task
-    return task
+    comments = memcache.get(key)
+    if comments is None or update:
+        comments = db.GqlQuery('Select * from Comment where task_id = :1 ORDER BY date DESC', int(key) )       
+        comments = list(comments)
+        memcache.set(key, comments)
+        return comments, True
+    return comments, False
+
+def getTaskByKey(task_id):
+    key = db.Key.from_path('Task',int(task_id), parent = task_key())
+    task = db.get(key)
+    if task:
+        return task 
+    return None
 
 ##########################################################################################
 ####        DB ACCESS   -   TASK PROCESS
 ##########################################################################################
 
-def commentTask(task_id, author, content):
-    if task_id and content :
-        com = Comment(task_id = int(task_id), author = author, content = content, date = datetime.datetime.now())
-        com.put()
-        getAllComments(True)  
-        return True
+def putTaskInCache(task):
+    key = 'tasks'
+    tasks = memcache.get(key)
+    if tasks :
+        tasks.append(task)
     else:
-        return False
+        tasks = []
+        tasks.append(task)
 
-def deleteTask(task_id, username):
-    if task_id and username:
-        key = db.Key.from_path('Task',int (task_id), parent = task_key())            
-        task = db.get(key)
-        #Get the username of the creator 
-        if task is not None:                
-            creator = task.author;
-            if username == creator:
-                task.deleteComments(int(task_id))
-                task.delete()
-                getAllTasks(True)
-                return (True, "Task has been correctly deleted")
-            else:
-                return (False, "You cannot delete tasks from other Bros modafucka !!!")
-    else:
-        return (False, "Task has not been deleted : data are missing")
+    memcache.delete(key)
+    memcache.set(key, tasks)        
 
-def deleteComment(comment_id):
-    key_comment = db.Key.from_path('Comment', int(comment_id))
-    commentToDel = db.get(key_comment)
-    if commentToDel:
-        commentToDel.delete()
-        getAllComments(True)
-        return True
-    return False
-
-
-def participateToTask(task_id, username):
-    key = db.Key.from_path('Task',int (task_id), parent = task_key())            
-    task = db.get(key)
+def participateToTask(task_id, username):    
+    key = db.Key.from_path('Task',int(task_id), parent = task_key())
+    task = db.get(key)   
     #If the task exists, add the user as a participant
-    if task is not None:                                
+    if task is not None:        
         task.addParticipant(int(task_id), username)
-        getTaskByKey(int(task_id), True)  
+        # update the cache
+        key = 'tasks'
+        tasks = memcache.get(key)
+        for c in tasks:
+            if c.__eq__(task):
+                index = tasks.index(c)
+                tasks[index] = task
+                break
+        if not memcache.set(key, tasks):            
+            memcache.delete(key)
+            memcache.set(key, tasks)
+        
         return True
     else:
         return False
@@ -145,12 +128,117 @@ def cancelParticipation(task_id, username):
         return False
     participants = task.getParticipant(task_id)    
     if participants is not None and username in participants:
-        task.participants.remove(self.user.username)                
+        task.participants.remove(username)
+        # update the cache
+        key = 'tasks'
+        tasks = memcache.get(key)
+        for c in tasks:
+            if c.__eq__(task):
+                index = tasks.index(c)
+                tasks[index] = task                               
+                break
+        if not memcache.set(key, tasks):            
+            memcache.delete(key)
+            memcache.set(key, tasks)                  
         task.put()
-        getAllTasks(True)
-        getTaskByKey(task_id, True)
+          
         return True
     return False
+
+
+def deleteTask(task_id, username):
+    if task_id and username:         
+        key = db.Key.from_path('Task',int(task_id), parent = task_key())
+        task = db.get(key)  
+        #Get the username of the creator
+        if task is not None:                
+            creator = task.author;
+            if username == creator:
+                #Delete entry in cache
+                key = 'tasks'
+                tasks = memcache.get(key)
+
+                found = False
+                for c in tasks:
+                    if c.__eq__(task):
+                        tasks.remove(task)
+                        found = True
+                        break
+                if not found :
+                    return list('notFound !!!'), False
+                
+                memcache.delete(key)
+                if not memcache.set(key, tasks):            
+                    memcache.delete(key)
+                    memcache.set(key, tasks)
+                
+                task.delete()
+                #Delete all comments relative to the Task        
+                taskComments = Comment.all()
+                taskComments.filter("task_id =", task_id)
+                for comment in taskComments.run():
+                    comment.delete()
+
+                return memcache.get(key), True
+            else:
+                return list('notasks'), False
+    else:
+        return list('notasks'), False
+
+
+
+
+##########################################################################################
+####        DB ACCESS   -   COMMENT PROCESS
+##########################################################################################
+
+def commentTask(task_id, author, content):
+    if task_id and content :
+        com = Comment(task_id = int(task_id), author = author, content = content, date = datetime.datetime.now())
+        com.put()      
+        # Update the cache
+        if com :
+            comments = memcache.get(task_id)
+            if comments :
+                comments.append(com)
+                memcache.set(task_id, comments)
+            else:
+                comments = []
+                comments.append(com)
+                memcache.set(task_id, comments)
+
+            
+            return True
+        else:
+            return False
+    else:
+        return False
+
+def deleteComment(task_id, comment_id):
+    key_comment = db.Key.from_path('Comment', int(comment_id))
+    commentToDel = db.get(key_comment)
+    if commentToDel:
+        #Delete entry in the cache
+        comments = memcache.get(task_id)
+        if len(comments) == 0:
+            pass
+        elif len(comments) == 1:
+            comments.pop(0)
+        else:
+            for c in comments:
+                if c.__eq__(commentToDel):
+                    index = comments.index(c)
+                    comments.pop(index)            
+                    break
+        
+        memcache.set(task_id, comments) 
+        commentToDel.delete()
+         
+
+        return memcache.get(task_id), True
+    return list('nocomment'), False
+
+
 
 
 
@@ -201,11 +289,12 @@ class HurbHandler(webapp2.RequestHandler):
 
 class Main(HurbHandler):
     def get(self):
-        tasks = getAllTasks()        
+        tasks = getAllTasks()
+                   
         if self.user:            
             self.render('home.html', tasks = tasks, username = self.user.username)            
         else:            
-            self.render('home.html', tasks = tasks)
+            self.render('home.html', tasks = tasks, username = "")
 
     def post(self):
         
@@ -217,45 +306,48 @@ class Main(HurbHandler):
         self.cancel = self.request.get('cancelParticipation')
 
         if self.user: 
+            error = False
+            error_log = ""
+
             #comment the Task
             if self.comment :
-                if not commentTask(self.task_id, self.user.username, self.content):                
-                    self.response.out.write("Comment has not been saved")
-                else:                                
-                    self.redirect('/')
-
-            #Delete the task with its comments
+                if not commentTask(self.task_id, self.user.username, self.content):   
+                    error = True             
+                    error_log = "Comment has not been saved"
+                
+            #Delete the task with its comments        
             if self.delete :
-                status,msg = deleteTask(self.task_id, self.user.username)
-                if not status:                
-                    self.response.out.write("%s" % msg)
-                else:
-                    self.response.out.write("%s" % msg)
+                tasks, status = deleteTask(self.task_id, self.user.username)
+                if status:
                     self.redirect('/')
+                else:
+                    self.redirect('/', None)
 
             #participate to the task
-            if self.participate :
-                #self.response.out.write("You really want to participate !!!")
+            if self.participate :            
                 if not participateToTask(self.task_id, self.user.username):                
-                    self.response.out.write("Task doesn't exist anymore")
-                else:
-                    self.redirect('/')
-
+                    error = True
+                    error_log = "Task doesn't exist anymore"
+            
             #Leave a task:
             if self.cancel: 
-                if cancelParticipation(self.task_id, self.user.username):
-                    self.redirect('/')
+                if not cancelParticipation(self.task_id, self.user.username):
+                    error = True
+                    error_log = "Participation canceled not handled"
 
 
-            tasks = getAllTasks(True)
-            comments = getAllComments(True)
-            self.render('home.html', tasks = tasks, comments = comments)
+            # tasks = getAllTasks(True)
+            # comments = getAllComments(True)
+            if error :
+                self.response.out.write("error log : "+error_log)
+            else:            
+                self.redirect('/') 
         else:
-            tasks = getAllTasks(True)
-            comments = getAllComments(True)
-            errorlog="you need to be log in if you want to add a comment or participate"
+            # tasks = getAllTasks(True)
+            # comments = getAllComments(True)
+            errorlog = "you need to be log in if you want to add a comment or participate"
             self.render('home.html',tasks = tasks, comments = comments,errorlog=errorlog)
-
+                   
 
 
 class NewTask(HurbHandler):
@@ -310,23 +402,25 @@ class NewTask(HurbHandler):
             self.render('newtask.html', **params)
         else:
             task = Task(parent = task_key(), author = self.author, title = self.taskTitle, description = self.taskDescription, date = convertedDate, location_lat = self.location_lat, location_lng = self.location_lng, reward = self.reward, participants = [])           
-            task.put()            
+            task.put()                   
             self.redirect('/task/%s' % str(task.key().id())) 
 
 
 class TaskPage(HurbHandler):
     def get(self,task_id):
-        getAllTasks(True)
         task = getTaskByKey(task_id)
         if not task:
             self.error(404)
-            return       
-        comments = getAllComments()  
+            return
+
+        tasks = getAllTasks(True)                
+        comments, status = getCommentsOfTasks(task_id)
+
         if self.format == 'html':
             if self.user:
                 self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
             else:
-                self.render("taskpermalink.html", task=task, username = "", comments = comments)
+                self.response.out.write("GET : no user")   
         else:
             self.render_json(task.as_dict())
 
@@ -345,7 +439,12 @@ class TaskPage(HurbHandler):
         self.cancel = self.request.get('cancelParticipation')
         self.deleteComment = self.request.get('deleteCom')
         self.comment_id = self.request.get('comment_id')
+
+
         if self.user:
+            error_log = ""
+            error = False
+
             task = getTaskByKey(task_id)
             if not task:
                 self.error(404)
@@ -353,45 +452,59 @@ class TaskPage(HurbHandler):
 
             #comment the Task
             if self.comment :
-                if not commentTask(self.task_id, self.user.username, self.content):                
-                    self.response.out.write("Comment has not been saved")
-                else:
-                    self.redirect(redirectTo)
-
-            #Delete the task with its comments
+                if not commentTask(task_id, self.user.username, self.content):                
+                    error_log = "Comment has not been saved"
+                    error = True
+            
+            #Delete the task with its comments        
             if self.delete :
-                (status,msg) = deleteTask(self.task_id, self.user.username)
-                if not status:                
-                    self.response.out.write("%s" % msg)
+                tasks, status = deleteTask(self.task_id, self.user.username)            
+                if status:
+                    redirectTo = "/"
+                    # error_log = "delete task correct "
+                    # for t in tasks :
+                    #     error_log = error_log + t.title + " - "
+                    # error = True
+                    #self.redirect('/', tasks)
+                    #self.redirect('/')
                 else:
-                    self.response.out.write("%s" % msg)
-                    self.redirect(redirectTo)
+                    error_log = "delete task NOT correct "
+                    for t in tasks :
+                        error_log = error_log + t + " - "
+                    error = True
+                    # self.redirect('/', None)
 
+            #delete a comment
             if self.deleteComment:
-                if deleteComment(self.comment_id):
-                    self.redirect(redirectTo)
+                if self.deleteComment:
+                    comments, status = deleteComment(task_id, self.comment_id)
+                    if not status:
+                        error = True
+                        error_log = "Fail to delete comment"
 
 
             #participate to the task
             if self.participate :            
-                if not participateToTask(self.task_id, self.user.username):                
-                    self.response.out.write("Task doesn't exist anymore")
-                else:
-                    self.redirect(redirectTo)
+                if not participateToTask(task_id, self.user.username):                
+                    error_log = "Task doesn't exist anymore"
+                    error = True
 
             #Leave a task:
             if self.cancel: 
-                if cancelParticipation(self.task_id, self.user.username):
-                    self.redirect(redirectTo)
+                if not cancelParticipation(task_id, self.user.username):
+                    error_log = "Cannot cancel participation"
+                    error = True
 
-            comments = getAllComments()  
-            self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
+            if error :
+                self.response.out.write("Error : "+error_log)
+            else:
+                self.redirect(redirectTo)
+
         else:
             tasks = getAllTasks(True)
             comments = getAllComments(True)
             errorlog="you need to be log in if you want to add a comment or participate"
             self.render('home.html',tasks = tasks, comments = comments,errorlog=errorlog)
-        
 
 
 class Signup(HurbHandler):
