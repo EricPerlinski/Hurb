@@ -34,7 +34,6 @@ class Comment(db.Model):
         u = Comment.all().filter('task_id =', taskid).get()
         return u   
 
-
     def gettaskid(self):
         return self.task_id
 
@@ -114,8 +113,6 @@ class Task(db.Model):
             return 0
     
     def as_dict(self):
-
-
         time_fmt = '%d-%m-%Y %H:%M'
         d = {'title': self.title,
              'description': self.description,

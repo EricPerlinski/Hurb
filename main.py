@@ -294,7 +294,7 @@ class Main(HurbHandler):
             if self.user:
                  self.render('home.html', tasks = tasks, username = self.user.username)
             else:
-              errorlog="you need to be log in"
+              errorlog="you need to be logged in =/"
               self.response.out.write(self.request.get('errorlog'))
               if self.request.get('errorlog'):  
                  self.render('home.html', tasks = tasks,errorlog=errorlog)

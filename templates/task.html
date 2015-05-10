@@ -16,7 +16,7 @@
             {{t._render_text | safe}}
           </p>
           
-          <div id="btnGroup{{t.key().id()}}" class="btn-group">
+          <div id="btnGroup{{t.key().id()}}" class="btnGroup{{t.key().id()}}">
 
             {% if t.getParticipant(t.key().id()) is not none and username not in t.getParticipant(t.key().id()) %}
               <button class="btn btn-default" type="button" id="participateBtn{{t.key().id()}}" name="participateBtn">
@@ -125,7 +125,11 @@
 
 
 
-        if ( pattern.test(url) ){
+        if ( ! pattern.test(url) ){
+          //If not permalink : hide all the button
+          $(".btnGroup{{t.key().id()}}").hide();
+        }
+        else{
           $(document.getElementById("permaLink")).hide();
           $(document.getElementById("participantsDiv")).show();
 
@@ -188,10 +192,7 @@
               e.preventDefault();
 
           });          
-        }
-        else{
-          //If not permalink : hide all the button
-          $(document.getElementById("btnGroup{{t.key().id()}}")).hide();
+          
         }
 
        
