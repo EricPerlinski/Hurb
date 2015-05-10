@@ -38,7 +38,7 @@
   <br/>
 
 
-  	{% if task.getNumberOfComments(task.key().id()) > 0 %}
+  	{% if comments %}
 
 	  	<div class="container" style="margin-top:50px">
 	  		<h3>Comments :</h3>
@@ -53,7 +53,7 @@
 
 
 		  {% for c in comments %}
-		  	{% if c.gettaskid() == task.key().id() %}
+		  	<!--{% if c.gettaskid() == task.key().id() %}-->
 		  		{{c.render() | safe}}
 
 
@@ -84,7 +84,7 @@
 				  </div>
 				</div>
 
-		  	{% endif %}
+		  	<!--{% endif %}-->
 		  	<script type="text/javascript">
 		  	$(document).ready(function(e){
 		  		$(document.getElementById("deleteComForm{{ c.key().id() }}")).hide();

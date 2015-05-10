@@ -124,6 +124,8 @@
         if ( pattern.test(url) ){
           $(document.getElementById("permaLink")).hide();
           $(document.getElementById("participantsDiv")).show();          
+        }else{
+          $(document.getElementById("commentBtn{{ t.key().id() }}")).hide();
         }
 
         $(document.getElementById("commentBtn{{ t.key().id() }}")).click(function(e) {

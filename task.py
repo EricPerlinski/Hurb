@@ -122,13 +122,6 @@ class Task(db.Model):
         TaskUser= db.GqlQuery('Select * from Task where author= :1',username)
         return TaskUser.run()
 
-    def deleteComments(cls, task_id):
-        #Delete all comments relative to the Task        
-        taskComments = Comment.all()
-        taskComments.filter("task_id =", task_id)
-        for comment in taskComments.run():
-            comment.delete()
-
     def getParticipant(cls,task_id):
         key = db.Key.from_path('Task', int(task_id), parent = task_key())
         task = db.get(key)
