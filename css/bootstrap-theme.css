@@ -401,13 +401,13 @@
 .list-group-item.active:hover,
 .list-group-item.active:focus {
   text-shadow: 0 -1px 0 #286090;
-  background-image: -webkit-linear-gradient(top, #337ab7 0%, #2b669a 100%);
-  background-image: -o-linear-gradient(top, #337ab7 0%, #2b669a 100%);
-  background-image: -webkit-gradient(linear, left top, left bottom, from(#337ab7), to(#2b669a));
-  background-image: linear-gradient(to bottom, #337ab7 0%, #2b669a 100%);
+  background-image: -webkit-linear-gradient(top, #F58331 0%, #2b669a 100%);
+  background-image: -o-linear-gradient(top, #F58331 0%, #2b669a 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#F58331), to(#2b669a));
+  background-image: linear-gradient(to bottom, #F58331 0%, #F58331 100%);
   background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff337ab7', endColorstr='#ff2b669a', GradientType=0);
-  border-color: #2b669a;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#F58331', endColorstr='#ff2b669a', GradientType=0);
+  border-color: #F58331;
 }
 .list-group-item.active .badge,
 .list-group-item.active:hover .badge,

@@ -1,14 +1,16 @@
 {% extends "header2.html" %}
 
 {% block information %}
-<h4>{{username}} </h4>
-<h4>Created Tasks</h4>
+  <div style="margin: 0 auto;width:20%;">
+		<h4 class="list-group-item active" style="text-align:center;">{{username}} </h4>
+  </div>
+<h4 class="list-group-item active">Created Tasks</h4>
    			{% if UserTask %}
 			  {%for usertask in UserTask %} 
 			  <p> {{usertask.render(username) | safe }}</p>
 			  {% endfor %}
 			{% endif %}
-<h4>Participating Tasks</h4>
+<h4 class="list-group-item active">Participating Tasks</h4>
    			{% if participant %}
 			  {%for p in participant %} 
 			  <p> {{p.render(p.author) | safe }}</p>

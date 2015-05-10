@@ -1,48 +1,54 @@
 {% extends "header2.html" %}
 
 {% block profil %}
-	{% if user %}
-		<aside class="span4">
-			<section id="user_info">				
-			    <div class="profil-area">
-					<p>{{user.username}}</br></p>
-					<p>mail : 
-						{% if user.email %}
+
+{% if user %}
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="list-group">
+				 <p class="list-group-item active">{{user.username}}</p>
+				<div class="list-group-item">
+					mail :{% if user.email %}
 							{{user.email}}
 						{% else %}
 							not set
 						{% endif %}
-						</br>
-					</p>
-					<p>Phone : 
+				</div>
+				<div class="list-group-item">
+					Phone : 
 						{% if user.phone %}
 							{{user.phone}}
 						{% else %}
 							not set
 						{% endif %}
-						</br>
-					</p>
-					<p>Address: 
+				</div>
+				<div class="list-group-item">
+					Address: 
 						{% if user.address %}
 							{{user.address}}
 						{% else %}
 							not set
 						{% endif %}
-						</br>
-					</p>
-			   	</div>
-			   <a href="/profil/modify" class="btn btn-default">modify</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>			
+				<div style="text-align:center;">
+			   <a href="/profil/modify" class="btn btn-default" >modify</a>
 			   <a  class="btn btn-default" id="sureButton">delete</a>
 			   <div id="sure">
 				<p> Are you sure you want to delete your account?  </p>
 				<a  href="/delete" class="btn btn-default" id="yes">yes</a>
 				<a  class="btn btn-default" id="no">no</a>
 			   </div>
+			</div>
 			</section>
 		</aside>
 		
 		<div class="profil-area">
-			<h3>My Tasks</br></h3>
+			<h3 class="list-group-item active" style="text-align:center;width=20em;margin-top:3em;">My Tasks</br></h3>
 			{% if UserTask %}
 			  {%for usertask in UserTask %} 
 			  <p> {{usertask.render(username) | safe }}</p>
