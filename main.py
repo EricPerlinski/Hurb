@@ -253,7 +253,7 @@ class Main(HurbHandler):
         else:
             tasks = getAllTasks(True)
             comments = getAllComments(True)
-            errorlog="you need to be log if you want to add a comment or participate"
+            errorlog="you need to be log in if you want to add a comment or participate"
             self.render('home.html',tasks = tasks, comments = comments,errorlog=errorlog)
 
 
@@ -345,47 +345,52 @@ class TaskPage(HurbHandler):
         self.cancel = self.request.get('cancelParticipation')
         self.deleteComment = self.request.get('deleteCom')
         self.comment_id = self.request.get('comment_id')
+        if self.user:
+            task = getTaskByKey(task_id)
+            if not task:
+                self.error(404)
+                return
 
-        task = getTaskByKey(task_id)
-        if not task:
-            self.error(404)
-            return
+            #comment the Task
+            if self.comment :
+                if not commentTask(self.task_id, self.user.username, self.content):                
+                    self.response.out.write("Comment has not been saved")
+                else:
+                    self.redirect(redirectTo)
 
-        #comment the Task
-        if self.comment :
-            if not commentTask(self.task_id, self.user.username, self.content):                
-                self.response.out.write("Comment has not been saved")
-            else:
-                self.redirect(redirectTo)
+            #Delete the task with its comments
+            if self.delete :
+                (status,msg) = deleteTask(self.task_id, self.user.username)
+                if not status:                
+                    self.response.out.write("%s" % msg)
+                else:
+                    self.response.out.write("%s" % msg)
+                    self.redirect(redirectTo)
 
-        #Delete the task with its comments
-        if self.delete :
-            (status,msg) = deleteTask(self.task_id, self.user.username)
-            if not status:                
-                self.response.out.write("%s" % msg)
-            else:
-                self.response.out.write("%s" % msg)
-                self.redirect(redirectTo)
-
-        if self.deleteComment:
-            if deleteComment(self.comment_id):
-                self.redirect(redirectTo)
+            if self.deleteComment:
+                if deleteComment(self.comment_id):
+                    self.redirect(redirectTo)
 
 
-        #participate to the task
-        if self.participate :            
-            if not participateToTask(self.task_id, self.user.username):                
-                self.response.out.write("Task doesn't exist anymore")
-            else:
-                self.redirect(redirectTo)
+            #participate to the task
+            if self.participate :            
+                if not participateToTask(self.task_id, self.user.username):                
+                    self.response.out.write("Task doesn't exist anymore")
+                else:
+                    self.redirect(redirectTo)
 
-        #Leave a task:
-        if self.cancel: 
-            if cancelParticipation(self.task_id, self.user.username):
-                self.redirect(redirectTo)
+            #Leave a task:
+            if self.cancel: 
+                if cancelParticipation(self.task_id, self.user.username):
+                    self.redirect(redirectTo)
 
-        comments = getAllComments()  
-        self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
+            comments = getAllComments()  
+            self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
+        else:
+            tasks = getAllTasks(True)
+            comments = getAllComments(True)
+            errorlog="you need to be log in if you want to add a comment or participate"
+            self.render('home.html',tasks = tasks, comments = comments,errorlog=errorlog)
         
 
 
