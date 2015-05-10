@@ -89,6 +89,16 @@ class Task(db.Model):
                 count = count+1
         return count
 
+
+    def getComments(self):
+        comments = []
+        comment = Comment.all()
+        count = 0
+        for i in comment:
+            if i.gettaskid() == self.key().id():
+                comments.append(i.as_dict())
+        return comments
+
     @classmethod
     def getNumberOfParticipants(self, jinjaid):
         key = db.Key.from_path('Task',int (jinjaid), parent = task_key())            
@@ -99,6 +109,8 @@ class Task(db.Model):
             return 0
     
     def as_dict(self):
+
+
         time_fmt = '%d-%m-%Y %H:%M'
         d = {'title': self.title,
              'description': self.description,
@@ -107,8 +119,9 @@ class Task(db.Model):
              'location_lat' : self.location_lat,
              'location_lng' : self.location_lng,
              'participants' : self.participants,
-             'reward' : self.reward
-            }
+             'reward' : self.reward,
+             'comments' : self.getComments()
+        }
         return d
 
     @classmethod

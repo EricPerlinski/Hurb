@@ -12,6 +12,8 @@ import datetime
 
 import webapp2
 import jinja2
+import json
+
 template_dir= os.path.join(os.path.dirname(__file__),'templates');
 jinja_env=jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),autoescape=True);
 def render_str(template, **params):
@@ -95,6 +97,11 @@ class HurbHandler(webapp2.RequestHandler):
         params['user'] = self.user
         t = jinja_env.get_template(template)
         return t.render(params)
+
+    def render_json(self,d):
+        json_txt = json.dumps(d)
+        self.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+        self.write(json_txt)
 
     def set_secure_cookie(self, name, val):
         cookie_val = make_secure_val(val)
@@ -256,7 +263,11 @@ class TaskPage(HurbHandler):
             self.error(404)
             return
 
-        self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
+        if self.format == 'html':
+            self.render("taskpermalink.html", task=task, username = self.user.username, comments = comments)
+        else:
+            self.render_json(task.as_dict())
+
 
     def post(self, task_id):
         url_get = self.request.url
