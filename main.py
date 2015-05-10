@@ -253,7 +253,7 @@ class Main(HurbHandler):
         else:
             tasks = getAllTasks(True)
             comments = getAllComments(True)
-            errorlog="you need to be log if you want to add a comment"
+            errorlog="you need to be log if you want to add a comment or participate"
             self.render('home.html',tasks = tasks, comments = comments,errorlog=errorlog)
 
 
