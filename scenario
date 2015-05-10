@@ -1,0 +1,8 @@
+As user:
+  -I can sign up only if the name i chose is not in the database
+  -I can log in and log out when i want
+  -I have to respect the typography when i want to put data into forms
+  -I can create,participate,delete differents tasks
+  -I can modify and delete my profil
+  -I can have some details about tasks i want to participate
+  -I know everything about me on my profil's page
