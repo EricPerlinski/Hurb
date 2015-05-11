@@ -1,8 +1,15 @@
+11/05/2015:
+	Last day of our project before the presentation ;
+	README completion
+	User's Scenarios have been written
+	Deployment of our site web on the appspot google 
+
 10/05/2015:
 	Today is the finalization of Hurb Project.
 		- MemCache is now set up !
-		- 
-	AS we decided to implement a memCache System
+		- All the data provided by the server are now JSON translatable
+		- Graphic improvement of several pages HTML
+		- fix of bugs
 
 
 
