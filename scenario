@@ -1,8 +1,23 @@
 As user:
-  -I can sign up only if the name i chose is not in the database
-  -I can log in and log out when i want
-  -I have to respect the typography when i want to put data into forms
-  -I can create,participate,delete differents tasks
-  -I can modify and delete my profil
-  -I can have some details about tasks i want to participate
-  -I know everything about me on my profil's page
+  -I can sign up only if the name I chose is not in the database
+  -I can log in 
+  -I have to respect the typography when I want to put data into forms
+  -I can see all tasks
+  -I can see the details of each task 
+  -I can display the profile page of a task's participant
+
+  When I'm logged in :  
+  -I can log out when I want
+  -I can create as many tasks I want
+  -I can delete all the tasks I have created
+  -I can post comments on all tasks
+  -I can delete my comments only
+  -I can have some details about tasks I want to participate to
+  -I can participate to a task and I can unregister my participation  
+
+  -I can modify my personnal information -email, phone number, address- in my profile
+  -I can modify and delete my profile, which implies that all content relative to me will be deleted  
+  -All the information relative to my account are present on my profile page
+
+  When I'm not logged in :
+  -I can't do what is specified in the previous section :"When I'm logged in"
