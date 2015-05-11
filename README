@@ -1,3 +1,56 @@
+10/05/2015:
+	Today is the finalization of Hurb Project.
+		- MemCache is now set up !
+		- 
+	AS we decided to implement a memCache System
+
+
+
+09/05/2015:
+	Like yesterday, lot of stuff has been done :
+		- We decide to display comments only on the permalink of the page.
+		- Javascript features on buttons
+		- Deletion of the task is now under condition.
+		- PArticipation : user can now cancel his participation
+		- A user can delete comments he has published
+	As a feature of our project, a Google Map has been added to each task, available only on the newTask creation.
+		-The Google Map is available on tasks' permalink
+	Et the end of the day, we decided to implement a memCache System.
+
+
+
+
+08/05/2015 :
+	Lot of stuff today !!! As the deadline approaches, all the team is on alert Mode !
+		- Design the WebSite following an HTML template !
+		- Add the user's tasks on its profile page
+		- Delete of user's account and tasks is now possible
+		- Registered as a participant for a task is now possible.
+		- Add a dateTimePicker to the task creation
+	The whole things is functionnal, but not perfect : the skeleton is set up !
+
+
+
+
+05/04/2015 :
+	Add of the id of the task in the jinja template, to display multiple tasks and handle properly actions relative to them.
+	For the need of the project, a refactoring has been done, separating the log.py file into 4 files :
+		*main.py : contains all the request Handler
+		*bro.py : db model of a Bro (user)
+		*task.py : db model of a task and a comment
+		*security.py : all methods relatives to crypt and encrypt data.
+	Finally, the infinite scroll has beenremoved of the project, due to complexity of implementation.
+
+
+02/05/215 :
+	Today has been a great day !
+	Permalink of tasks are now present, with a good display (readable).
+	Besides, the Profil.html has been improved
+	Finally, all required libraries to set up an infinite scroll are in the project.
+
+
+
+
 30/04/2015 :
 	Today, all the team have finished dedicated tasks (almost).
 	A meeting has been made, these are the relevant points of it :
